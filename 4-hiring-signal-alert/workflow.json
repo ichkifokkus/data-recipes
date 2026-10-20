@@ -1,0 +1,230 @@
+{
+  "name": "Data Recipe: Hiring-signal alert for target companies",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Hiring-signal alert for a list of companies\nEvery morning the [Job Search API](https://apify.com/fast_data_asap/job-search-api) reads the career pages (Greenhouse, Lever, Ashby, SmartRecruiters) of the companies you watch. Only postings you have not seen before are kept, logged to Google Sheets and summarised in Slack.\n\n**Setup (5 min)**\n1. *Get open roles*: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n2. Edit `companies` (`greenhouse:stripe`, `lever:palantir`, `ashby:ramp` or careers URLs).\n3. Connect Google Sheets (tab `Jobs`) and Slack.\n\nNote: the first run reports everything posted in the last 2 days as new.\nCost: $0.0025 per job returned. 3 companies = roughly $0.03/day.",
+        "height": 420,
+        "width": 540
+      },
+      "id": "b550d621-d943-530b-914d-d811a9f73638",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -420
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "ef2f72ef-1395-5766-b4b3-941d4bfbe48c",
+      "name": "Every day 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~job-search-api/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"companies\": [\n    \"greenhouse:stripe\",\n    \"ashby:ramp\",\n    \"lever:palantir\"\n  ],\n  \"postedWithinDays\": 2,\n  \"maxJobsPerSource\": 100,\n  \"includeDescription\": false\n}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "a1bfed9f-21f7-5665-95a2-b24f2c9ef873",
+      "name": "Get open roles",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/job-search-api and returns its dataset. The JSON body is the Actor input - edit it freely."
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.url }}",
+        "options": {
+          "historySize": 50000
+        }
+      },
+      "id": "aeda10d6-7b8a-5e3d-a01d-065e118477d6",
+      "name": "New postings only",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Adds a team guess from the job title and keeps the columns we want in the sheet.\nconst TEAMS = [\n  ['Leadership', /\\b(head of|director|vp|vice president|chief|country manager|general manager)\\b/i],\n  ['Recruiting & People', /recruit|sourcer|talent|people partner|\\bhr\\b/i],\n  ['Sales', /sales|account executive|account manager|business development|\\b[bs]dr\\b|partnership/i],\n  ['Marketing', /marketing|growth|brand|content|communications/i],\n  ['Customer', /support|success|customer|solutions|implementation/i],\n  ['Data & AI', /\\bdata\\b|machine learning|\\bml\\b|\\bai\\b|research|scientist|analytics/i],\n  ['Engineering', /engineer|developer|software|backend|frontend|full.?stack|\\bsre\\b|devops|infrastructure|security/i],\n  ['Product & Design', /product|design|\\bux\\b|\\bui\\b/i],\n];\nconst teamOf = title => (TEAMS.find(([, re]) => re.test(title)) || ['Other'])[0];\n\nreturn $input.all().map(i => {\n  const j = i.json;\n  return { json: {\n    found_at: $now.toFormat('yyyy-MM-dd'),\n    company: j.company,\n    team: teamOf(j.title || ''),\n    title: j.title,\n    location: j.location,\n    remote: j.remote ? 'yes' : 'no',\n    posted_at: String(j.postedAt || '').slice(0, 10),\n    url: j.url,\n    source: j.source,\n  } };\n});\n"
+      },
+      "id": "d74d9cfa-55bb-584f-b24f-0a01ff5b9bb3",
+      "name": "Tag team & pick columns",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Jobs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "7b9f2025-ed80-5782-9ba5-9fefa47102ec",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        900,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// One Slack message: new roles per company, with a team breakdown and the first few titles.\nconst SHOW_TITLES = 5;\nconst jobs = $input.all().map(i => i.json);\nif (jobs.length === 0) return [];\n\nconst byCompany = {};\nfor (const j of jobs) (byCompany[j.company] = byCompany[j.company] || []).push(j);\n\nconst esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\\|/g, '-').trim();\nconst companies = Object.entries(byCompany).sort((a, b) => b[1].length - a[1].length);\nlet text = `*Hiring signals*: ${jobs.length} new role(s) at ${companies.length} company(ies)\\n`;\nfor (const [company, list] of companies) {\n  const teams = {};\n  for (const j of list) teams[j.team] = (teams[j.team] || 0) + 1;\n  const mix = Object.entries(teams).sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t} ${n}`).join(', ');\n  text += `\\n*${esc(company)}*: ${list.length} new (${mix})\\n`;\n  for (const j of list.slice(0, SHOW_TITLES)) text += `- <${j.url}|${esc(j.title)}> - ${esc(j.location)}\\n`;\n  if (list.length > SHOW_TITLES) text += `...and ${list.length - SHOW_TITLES} more (see the sheet)\\n`;\n}\nreturn [{ json: { text } }];\n"
+      },
+      "id": "b910145e-ff87-555d-a108-f1ec193e5226",
+      "name": "Build Slack digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#hiring-signals",
+          "mode": "name"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false
+        }
+      },
+      "id": "e29e5758-cf44-5e30-bc3f-b723f99089d2",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Every day 8:00": {
+      "main": [
+        [
+          {
+            "node": "Get open roles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get open roles": {
+      "main": [
+        [
+          {
+            "node": "New postings only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New postings only": {
+      "main": [
+        [
+          {
+            "node": "Tag team & pick columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tag team & pick columns": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack digest": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

@@ -1,0 +1,327 @@
+{
+  "name": "Data Recipe: YouTube channel to AI summaries in Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## YouTube channel -> AI summaries -> Google Sheets\nEvery Monday this workflow fetches the latest videos of a channel with the [YouTube Transcript Scraper](https://apify.com/fast_data_asap/youtube-transcript-scraper), summarises every new video with an LLM and appends one row per video to Google Sheets.\n\n**Setup (5 min)**\n1. *Get transcripts*: create a **Header Auth** credential: Name `Authorization`, Value `Bearer <your Apify API token>`.\n2. Change the channel URL in the JSON body.\n3. *OpenAI Chat Model*: add your OpenAI key (or swap in the Anthropic Chat Model).\n4. *Append to Google Sheets*: pick your spreadsheet. Tab `Summaries`, header row: `date, channel, title, url, minutes, words, summary`.\n\nCost: $0.002 per transcript (videos without transcript are free).",
+        "height": 400,
+        "width": 520
+      },
+      "id": "2025ec96-c1d7-5853-be06-c48d19c2227a",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "2b23d5cc-97e3-58d1-9c3b-a58bb20fe7fd",
+      "name": "Every Monday 7:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~youtube-transcript-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"startUrls\": [\n    \"https://www.youtube.com/@Fireship/videos\"\n  ],\n  \"maxVideosPerSource\": 3,\n  \"languages\": [\n    \"en\"\n  ],\n  \"includeSegments\": false\n}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "fdace3f2-a0c5-5ecd-b2cf-1b892512a3cd",
+      "name": "Get transcripts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/youtube-transcript-scraper and returns its dataset. The JSON body is the Actor input - edit it freely."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c6d9f92-4fac-5bc5-8c1a-afa875768932",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b32de715-1bb6-5455-b95b-94e9fe55e912",
+      "name": "Has transcript",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.videoId }}",
+        "options": {
+          "historySize": 50000
+        }
+      },
+      "id": "86af7262-521c-59aa-a3fb-bf5020f2e622",
+      "name": "Only new videos",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize this YouTube video for a busy reader.\n\nTitle: {{ $json.title }}\n\nWrite:\n1. A one-sentence TL;DR.\n2. Three to five key points as a bulleted list.\n3. One notable quote from the transcript, if there is one.\n\nPlain text, no headings. Transcript:\n{{ $json.text.slice(0, 60000) }}"
+      },
+      "id": "5c5cfc35-ee1b-5162-9a32-a08a4b0c19b2",
+      "name": "Summarize transcript",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        880,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "id": "19114de5-b34e-52e8-9f51-1d636a0bb102",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "008212c3-63a2-5b4d-86c6-c074e6256346",
+              "name": "date",
+              "value": "={{ $now.toFormat('yyyy-MM-dd') }}",
+              "type": "string"
+            },
+            {
+              "id": "82d0b248-90c4-51ec-acb4-71cb0c5de658",
+              "name": "channel",
+              "value": "={{ $('Only new videos').item.json.channel || $('Only new videos').item.json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "0c383f58-b812-5739-87b0-c87a9b6d3f14",
+              "name": "title",
+              "value": "={{ $('Only new videos').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "7784f425-c8e8-54ca-a6b9-464d971c6b36",
+              "name": "url",
+              "value": "={{ $('Only new videos').item.json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "a2cb6ac9-457b-554b-a524-2a7d04b4a5af",
+              "name": "minutes",
+              "value": "={{ Math.round(($('Only new videos').item.json.durationSeconds || 0) / 60) }}",
+              "type": "number"
+            },
+            {
+              "id": "510bd237-36ed-5d4c-8837-1f777b57ec29",
+              "name": "words",
+              "value": "={{ $('Only new videos').item.json.wordCount }}",
+              "type": "number"
+            },
+            {
+              "id": "37d8e66f-42f6-5dff-837f-92eccec2a2b1",
+              "name": "summary",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d75f2be-7d0e-59a6-be8c-b51fc57f4865",
+      "name": "Prepare row",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1180,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Summaries",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "2552564c-c066-5397-af73-aee686bf4f16",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1400,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 7:00": {
+      "main": [
+        [
+          {
+            "node": "Get transcripts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get transcripts": {
+      "main": [
+        [
+          {
+            "node": "Has transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has transcript": {
+      "main": [
+        [
+          {
+            "node": "Only new videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only new videos": {
+      "main": [
+        [
+          {
+            "node": "Summarize transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize transcript": {
+      "main": [
+        [
+          {
+            "node": "Prepare row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare row": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize transcript",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

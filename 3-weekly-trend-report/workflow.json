@@ -1,0 +1,154 @@
+{
+  "name": "Data Recipe: Weekly Google Trends keyword report",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Weekly keyword trend report -> Google Sheets\nEvery Monday the [Google Trends Scraper](https://apify.com/fast_data_asap/google-trends-scraper) pulls 90 days of Google Trends data for your keywords. A Code node turns it into one row per keyword (this week vs. last week, change %, peak, rising queries) and appends it to a sheet, so you build a trend history over time.\n\n**Setup (5 min)**\n1. *Get Google Trends*: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n2. Edit `searchTerms` and `geo` (empty = worldwide). More than 5 terms work.\n3. *Append to Google Sheets*: pick your spreadsheet, tab `Trends`.\n\nCost: $0.003 per result. 3 keywords = 4 results = $0.012 per week.",
+        "height": 400,
+        "width": 520
+      },
+      "id": "525726eb-ec49-5fc5-a976-a81778ec9e17",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -400
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "e47631e8-298b-5611-b9c5-a0c2644ad2c2",
+      "name": "Every Monday 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~google-trends-scraper/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"searchTerms\": [\n    \"notion\",\n    \"obsidian\",\n    \"evernote\"\n  ],\n  \"geo\": \"US\",\n  \"timeRange\": \"today 3-m\",\n  \"includeInterestOverTime\": true,\n  \"includeInterestByRegion\": false,\n  \"includeRelatedQueries\": true\n}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "871bc7f3-6ddb-5855-a998-a6030d40ddc6",
+      "name": "Get Google Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/google-trends-scraper and returns its dataset. The JSON body is the Actor input - edit it freely."
+    },
+    {
+      "parameters": {
+        "jsCode": "// One row per keyword: this week vs. last week, period average, peak and rising queries.\nconst items = $input.all().map(i => i.json);\nconst timelines = items.filter(i => i.type === 'interestOverTime');\nif (timelines.length === 0) throw new Error('No interestOverTime result. Check the Apify run log.');\n\nconst avg = a => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);\nconst r1 = v => (v === null || Number.isNaN(v) ? '' : Math.round(v * 10) / 10);\nconst reportDate = $now.toFormat('yyyy-MM-dd');\nconst rows = [];\n\nfor (const t of timelines) {\n  const points = (t.timeline || []).filter(p => !p.isPartial);\n  const stepDays = points.length > 1 ? (points[1].time - points[0].time) / 86400 : 7;\n  const win = Math.max(1, Math.round(7 / stepDays)); // data points per week (7 for daily, 1 for weekly data)\n  for (const kw of t.keywords) {\n    const series = points.map(p => Number(p.values[kw] ?? 0));\n    const thisWeek = avg(series.slice(-win));\n    const lastWeek = avg(series.slice(-2 * win, -win));\n    const peak = points[series.indexOf(Math.max(...series))];\n    const related = items.find(i => i.type === 'relatedQueries' && i.keyword === kw) || {};\n    rows.push({ json: {\n      report_date: reportDate,\n      keyword: kw,\n      geo: t.geo,\n      this_week: r1(thisWeek),\n      last_week: r1(lastWeek),\n      change_pct: lastWeek ? r1(((thisWeek - lastWeek) / lastWeek) * 100) : '',\n      period_avg: r1(t.averages && t.averages[kw] !== undefined ? t.averages[kw] : avg(series)),\n      peak: peak ? peak.formattedTime : '',\n      rising_queries: (related.rising || []).slice(0, 5).map(q => `${q.query} (${q.formattedValue})`).join(', '),\n    } });\n  }\n}\nreturn rows;\n"
+      },
+      "id": "6904917f-9b5a-5154-85f6-f2166873bf2e",
+      "name": "Weekly summary per keyword",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Trends",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "0355b196-8288-500e-9d7c-b51128b2773f",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        680,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 8:00": {
+      "main": [
+        [
+          {
+            "node": "Get Google Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Trends": {
+      "main": [
+        [
+          {
+            "node": "Weekly summary per keyword",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly summary per keyword": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

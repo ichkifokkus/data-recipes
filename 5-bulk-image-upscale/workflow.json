@@ -1,0 +1,501 @@
+{
+  "name": "Data Recipe: Bulk-upscale product images from Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Bulk-upscale product images from a Google Sheet\nReads image URLs from a sheet, upscales every row that has no result yet with the [AI Image Upscaler](https://apify.com/fast_data_asap/ai-image-upscaler) (Real-ESRGAN, 4x), saves the files to Google Drive and writes the links back into the sheet.\n\n**Setup (10 min)**\n1. Sheet tab `Images` with the header row `image_url, upscaled_url, size, status`.\n2. *Upscale images* and *Download result*: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n3. Connect Google Sheets (3 nodes) and Google Drive; pick spreadsheet and Drive folder.\n4. Click **Execute workflow**. Run it again any time: finished rows are skipped.\n\nCost: $0.015 per upscaled image ($15 per 1,000). Failed images are free.",
+        "height": 440,
+        "width": 540
+      },
+      "id": "485fcff2-1605-5d47-b31d-63cef26e96d2",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -440
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "5de05e1d-7000-58e7-a1e2-5922a3839057",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Images",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "3c168460-f52e-555b-ae32-d149d4930277",
+      "name": "Read image list",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5465b885-9ac8-50aa-9a4d-95d4b16fce0e",
+              "leftValue": "={{ $json.image_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f705800b-13ec-5ef0-abc3-c8c5ab227e1a",
+              "leftValue": "={{ $json.upscaled_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a6f88771-7727-5eb1-9b9d-343b80370c3f",
+      "name": "Not done yet",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Groups the image URLs into batches. Each batch becomes one Apify run (keeps every run well under 5 minutes).\nconst BATCH_SIZE = 5;\nconst urls = [...new Set($input.all().map(i => String(i.json.image_url || '').trim()).filter(Boolean))];\nconst batches = [];\nfor (let i = 0; i < urls.length; i += BATCH_SIZE) batches.push({ json: { imageUrls: urls.slice(i, i + BATCH_SIZE) } });\nreturn batches;\n"
+      },
+      "id": "912c7449-5362-5c87-bc82-47a0fca85fd9",
+      "name": "Batch URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~ai-image-upscaler/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ imageUrls: $json.imageUrls, scale: '4', outputFormat: 'jpg', quality: 92 }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "4c6e4fb4-a363-5493-91be-67a5fc95b01a",
+      "name": "Upscale images",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/ai-image-upscaler and returns its dataset. The JSON body is the Actor input - edit it freely."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c6d9f92-4fac-5bc5-8c1a-afa875768932",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "61fc5b91-6483-50cb-b002-c872e7e37f19",
+      "name": "Upscaled?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.outputUrl }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "517e577b-d11c-5d8e-9f2f-c9d3aef91843",
+      "name": "Download result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Upscale images').item.json.sourceUrl.split('/').pop().split('?')[0].replace(/\\.[a-z0-9]+$/i, '') + '-4x.' + $('Upscale images').item.json.format }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "root",
+          "mode": "list",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "7d274fe3-9e48-5efd-a750-c6fb63b348a0",
+      "name": "Save to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4219340b-1f92-5ab3-9faf-a22fcf7eb8e4",
+              "name": "image_url",
+              "value": "={{ $('Upscale images').item.json.sourceUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "e4cdfaf1-d30b-5b75-a611-92e55fc6614d",
+              "name": "upscaled_url",
+              "value": "=https://drive.google.com/file/d/{{ $json.id }}/view",
+              "type": "string"
+            },
+            {
+              "id": "fdf0a05f-f9ce-5947-ab99-465a8cb1d51a",
+              "name": "size",
+              "value": "={{ $('Upscale images').item.json.outputWidth }}x{{ $('Upscale images').item.json.outputHeight }}",
+              "type": "string"
+            },
+            {
+              "id": "6183aecc-7652-51ab-9871-4e1312f45991",
+              "name": "status",
+              "value": "done",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "145e5bd7-1ac5-5c2d-bae8-4873c44e56f8",
+      "name": "Row: done",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71ca527a-5405-5497-a296-ddc4e88ffb14",
+              "name": "image_url",
+              "value": "={{ $json.sourceUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "38d18190-69ab-5e63-9ea5-fca3122d025e",
+              "name": "upscaled_url",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "e9318c2b-04ad-5f7d-831e-1f41fa71b6e8",
+              "name": "size",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "f3b00b0b-410b-5e50-8514-361303acec0f",
+              "name": "status",
+              "value": "=failed: {{ String($json.error || 'unknown error').split('\\n')[0].slice(0, 200) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "160613b3-7e54-5c43-99fd-6aad18ac6dee",
+      "name": "Row: failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1220,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Images",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "image_url": "={{ $json.image_url }}",
+            "upscaled_url": "={{ $json.upscaled_url }}",
+            "size": "={{ $json.size }}",
+            "status": "={{ $json.status }}"
+          },
+          "matchingColumns": [
+            "image_url"
+          ],
+          "schema": [
+            {
+              "id": "image_url",
+              "displayName": "image_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "upscaled_url",
+              "displayName": "upscaled_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "size",
+              "displayName": "size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b7567bae-25c1-559e-84a5-5fd6259d53d5",
+      "name": "Write back to sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1880,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Read image list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read image list": {
+      "main": [
+        [
+          {
+            "node": "Not done yet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not done yet": {
+      "main": [
+        [
+          {
+            "node": "Batch URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch URLs": {
+      "main": [
+        [
+          {
+            "node": "Upscale images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upscale images": {
+      "main": [
+        [
+          {
+            "node": "Upscaled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upscaled?": {
+      "main": [
+        [
+          {
+            "node": "Download result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Row: failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download result": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Row: done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Row: done": {
+      "main": [
+        [
+          {
+            "node": "Write back to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Row: failed": {
+      "main": [
+        [
+          {
+            "node": "Write back to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
