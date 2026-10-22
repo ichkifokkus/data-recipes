@@ -1,0 +1,34 @@
+name: Publish to MCP Registry
+
+# Publishes server.json (a remote-server entry pointing at Apify's hosted MCP
+# server with the Fast Data Actors) to registry.modelcontextprotocol.io.
+# Auth: GitHub OIDC, so no secrets are needed. Bump "version" in server.json
+# for every new publish; the registry rejects a version that already exists.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - server.json
+      - .github/workflows/publish-mcp.yml
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for mcp-publisher login github-oidc
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server to MCP Registry
+        run: ./mcp-publisher publish

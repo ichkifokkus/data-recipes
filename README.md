@@ -61,6 +61,16 @@ Limits of the synchronous endpoint: Apify waits up to 300 seconds. Runs that tak
 
 Every workflow was imported into n8n 2.43 and checked against n8n's own node definitions (node types, versions, parameters). Each one was then executed end-to-end with real Apify runs of the exact input shown in the recipe; only the steps that need your accounts (Slack, Google Sheets, Google Drive, OpenAI, e-mail) were replaced by placeholders. The example outputs in the READMEs come from those runs (October 2026).
 
+## Use these tools from Claude/Cursor via MCP
+
+All Fast Data Actors can also be called directly by AI agents (Claude, Claude Code, Cursor, VS Code) through **Apify's hosted MCP server**, limited to our Actors:
+
+```
+https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
+```
+
+Add it as a custom connector in Claude (sign in to Apify via OAuth), or send `Authorization: Bearer <APIFY_TOKEN>` from Cursor or Claude Code. The server is run by Apify, not by us; runs are billed to your Apify account at the Actors' normal prices. Copy-paste configs for each client: [mcp/README.md](mcp/). Registry entry: `io.github.ichkifokkus/fast-data` ([server.json](server.json)).
+
 ## License
 
 The workflows and texts in this folder are free to use, copy and change (MIT). The data you collect belongs to its owners; respect copyright, site terms and data protection rules.

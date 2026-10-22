@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ichkifokkus/fast-data",
+  "title": "Fast Data Actors (via Apify MCP)",
+  "description": "YouTube transcripts, Google News/Trends, job postings, doc-to-Markdown and image tools via Apify",
+  "repository": {
+    "url": "https://github.com/ichkifokkus/data-recipes",
+    "source": "github",
+    "subfolder": "mcp"
+  },
+  "websiteUrl": "https://github.com/ichkifokkus/data-recipes/tree/main/mcp",
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Apify API token, e.g. 'Bearer <apify-api-token>'. Optional for clients that support OAuth (Claude.ai, VS Code).",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
