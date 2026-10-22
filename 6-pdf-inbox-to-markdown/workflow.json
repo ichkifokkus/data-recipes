@@ -1,0 +1,353 @@
+{
+  "name": "Data Recipe: PDF inbox to Markdown and AI summary",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## PDF inbox -> Markdown -> AI summary\nDrop a PDF (or DOCX, PPTX, XLSX, scan) into a Google Drive folder - or POST a URL to the webhook. [Document to Markdown](https://apify.com/fast_data_asap/document-to-markdown) turns it into Markdown (OCR for scanned pages), an LLM summarises it, and a Google Doc with summary + full text lands in your folder.\n\n**Setup (10 min)**\n1. Create a Drive folder `PDF inbox` and share it as *Anyone with the link: Viewer* (the Actor downloads by link).\n2. *Convert to Markdown*: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n3. Connect Google Drive in the trigger and pick the folder; connect Google Docs in both Docs nodes.\n4. Add your OpenAI credential (or swap the model node).\n5. Activate. Drive is polled every minute.\n\nCost: $1.50 per 1,000 pages, +$5 per 1,000 pages that need OCR. Failed files are free.",
+        "height": 500,
+        "width": 560
+      },
+      "id": "18cc2278-d249-5016-80fb-01181ae0e3b6",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "0f799101-da55-51dd-b117-76e6a94a9c24",
+      "name": "New file in PDF inbox",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pdf-inbox",
+        "options": {}
+      },
+      "id": "f17906fe-e695-5c88-b11a-85dba625b6cd",
+      "name": "Webhook: convert URL",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "webhookId": "3f6a3c1e-2b55-4d0e-9a3e-6d1f0c9b7a61",
+      "notesInFlow": true,
+      "notes": "Optional second entry: POST {\"url\": \"https://.../file.pdf\", \"name\": \"optional\"}"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turns new Drive files and webhook calls into { url, name } - one item per document.\n// Drive files must be readable by link (see Setup). Folders and unsupported files are skipped.\nconst SUPPORTED = /\\.(pdf|docx|pptx|xlsx|xls|epub|html?|png|jpe?g|webp|tiff?)$/i;\nconst out = [];\nfor (const item of $input.all()) {\n  const j = item.json;\n  if (j.body && j.body.url) {            // Webhook: POST { \"url\": \"https://...\", \"name\": \"optional\" }\n    const url = String(j.body.url).trim();\n    out.push({ json: { url, name: j.body.name || url.split('/').pop().split('?')[0] } });\n    continue;\n  }\n  if (!j.id || j.mimeType === 'application/vnd.google-apps.folder') continue;\n  const googleNative = String(j.mimeType || '').startsWith('application/vnd.google-apps.');\n  if (!googleNative && j.mimeType !== 'application/pdf' && !SUPPORTED.test(j.name || '')) continue;\n  const native = { document: 'document', presentation: 'presentation', spreadsheet: 'spreadsheets' }[String(j.mimeType).split('.').pop()];\n  if (googleNative && !native) continue;   // Drawings, forms etc.\n  const url = native ? `https://docs.google.com/${native}/d/${j.id}/edit` : `https://drive.google.com/file/d/${j.id}/view`;\n  out.push({ json: { url, name: j.name } });\n}\nreturn out;\n"
+      },
+      "id": "8191eaf0-f513-5b30-b666-b139926f63c1",
+      "name": "Collect documents",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~document-to-markdown/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ documentUrls: [$json.url], ocr: 'auto', includePageBreaks: true }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "54f818b6-e889-53b7-b2c7-9cddd30a4e4e",
+      "name": "Convert to Markdown",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/document-to-markdown and returns its dataset. The JSON body is the Actor input - edit it freely."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1158fff8-7ebc-5262-9150-2c89a349cf2e",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "166b2c46-88f4-577c-bd8e-c9297b0c6c83",
+      "name": "Converted?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        680,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are reading a document that just arrived in our inbox.\n\nFile: {{ $('Collect documents').item.json.name }}\nPages: {{ $json.pagesProcessed }}\n\nWrite plain text, no Markdown:\n1. One sentence: what kind of document this is and who it is from.\n2. Key facts as 3-7 short lines starting with '- ': parties, dates, amounts, deadlines, decisions. Copy numbers exactly. Add the page number from the <!-- Page N --> markers, e.g. (p. 2).\n3. 'Action needed:' followed by what someone has to do, or 'none'.\n\nDocument as Markdown:\n{{ $json.markdown.slice(0, 80000) }}"
+      },
+      "id": "347cae08-d483-54db-a1c5-7e0d0d3461e9",
+      "name": "Summarize document",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        900,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {}
+      },
+      "id": "08a74695-8dd7-5958-9dd3-399af3025205",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "driveId": "myDrive",
+        "folderId": "default",
+        "title": "={{ 'Summary - ' + $('Collect documents').item.json.name }}"
+      },
+      "id": "bedd27ec-9e50-5f7c-8f26-dc8df417f696",
+      "name": "Create Google Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        0
+      ],
+      "notesInFlow": true,
+      "notes": "Pick the folder where summaries should go (default: My Drive root)."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "object": "text",
+              "action": "insert",
+              "locationChoice": "endOfSegmentLocation",
+              "text": "={{ 'SUMMARY\\n\\n' + $('Summarize document').item.json.text + '\\n\\n----------\\nSource: ' + $('Convert to Markdown').item.json.url + '\\nPages: ' + $('Convert to Markdown').item.json.pagesProcessed + ' (OCR: ' + $('Convert to Markdown').item.json.ocrPages + '), words: ' + $('Convert to Markdown').item.json.wordCount + '\\n\\nFULL TEXT (Markdown)\\n\\n' + $('Convert to Markdown').item.json.markdown }}"
+            }
+          ]
+        }
+      },
+      "id": "848eaf3b-c4e6-56ee-acd5-f3c9ba75b790",
+      "name": "Write summary + Markdown",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ea96d53a-7f5a-5696-9d2e-5e487b5ae60c",
+              "name": "file",
+              "value": "={{ $('Collect documents').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "90e80fe8-789c-5ceb-a69b-9aca0242e8b9",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "50732f3e-31b6-57a3-9f5a-04c33f2327e0",
+              "name": "error",
+              "value": "={{ String($json.error || $json.status || 'unknown error').split('\\n')[0].slice(0, 300) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "685dd4fd-6d82-5641-8c23-6c77b8279745",
+      "name": "Conversion failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        420
+      ],
+      "notesInFlow": true,
+      "notes": "Not charged. Connect Slack or Gmail here if you want to be told."
+    }
+  ],
+  "connections": {
+    "New file in PDF inbox": {
+      "main": [
+        [
+          {
+            "node": "Collect documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: convert URL": {
+      "main": [
+        [
+          {
+            "node": "Collect documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect documents": {
+      "main": [
+        [
+          {
+            "node": "Convert to Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Markdown": {
+      "main": [
+        [
+          {
+            "node": "Converted?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converted?": {
+      "main": [
+        [
+          {
+            "node": "Summarize document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conversion failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize document",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize document": {
+      "main": [
+        [
+          {
+            "node": "Create Google Doc",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Doc": {
+      "main": [
+        [
+          {
+            "node": "Write summary + Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

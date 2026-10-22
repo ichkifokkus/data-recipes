@@ -1,6 +1,6 @@
 # Data Recipes by Fast Data
 
-Free, ready-to-import **n8n workflows** that solve one small data job each: summarise a YouTube channel, get a daily news alert, track keyword trends, watch companies for new job postings, upscale product photos in bulk.
+Free, ready-to-import **n8n workflows** that solve one small data job each: summarise a YouTube channel, get a daily news alert, track keyword trends, watch companies for new job postings, upscale product photos in bulk, turn incoming PDFs into Markdown with an AI summary.
 
 Each recipe is one folder with:
 
@@ -17,6 +17,7 @@ The data comes from public [Apify](https://apify.com) Actors by **Fast Data** ([
 | 3 | [Weekly keyword trend report](3-weekly-trend-report/) | [Google Trends Scraper](https://apify.com/fast_data_asap/google-trends-scraper) | Weekly | Google Sheets | ~$0.05/month |
 | 4 | [Hiring-signal alert for target companies](4-hiring-signal-alert/) | [Job Search API](https://apify.com/fast_data_asap/job-search-api) | Daily | Slack + Google Sheets | ~$1/month for 3 companies |
 | 5 | [Bulk-upscale product images from a sheet](5-bulk-image-upscale/) | [AI Image Upscaler](https://apify.com/fast_data_asap/ai-image-upscaler) | Manual | Google Drive + Google Sheets | $0.015 per image |
+| 6 | [PDF inbox to Markdown and AI summary](6-pdf-inbox-to-markdown/) | [Document to Markdown](https://apify.com/fast_data_asap/document-to-markdown) | New file in Drive / webhook | Google Docs (+ OpenAI) | $0.0015 per page |
 
 Costs are the Actors' pay-per-result prices on the Apify Free and Starter plans (higher plans pay less). You pay only for results; there is no separate compute charge for these Actors. The Apify Free plan includes $5 of usage every month, which covers recipes 2, 3 and 4 running together every month.
 
