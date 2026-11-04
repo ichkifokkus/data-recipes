@@ -18,6 +18,7 @@ The data comes from public [Apify](https://apify.com) Actors by **Fast Data** ([
 | 4 | [Hiring-signal alert for target companies](4-hiring-signal-alert/) | [Job Search API](https://apify.com/fast_data_asap/job-search-api) | Daily | Slack + Google Sheets | ~$1/month for 3 companies |
 | 5 | [Bulk-upscale product images from a sheet](5-bulk-image-upscale/) | [AI Image Upscaler](https://apify.com/fast_data_asap/ai-image-upscaler) | Manual | Google Drive + Google Sheets | $0.015 per image |
 | 6 | [PDF inbox to Markdown and AI summary](6-pdf-inbox-to-markdown/) | [Document to Markdown](https://apify.com/fast_data_asap/document-to-markdown) | New file in Drive / webhook | Google Docs (+ OpenAI) | $0.0015 per page |
+| 7 | [Competitor product & page alert (sitemap changes)](7-competitor-sitemap-alert/) | [Sitemap Change Monitor](https://apify.com/fast_data_asap/sitemap-change-monitor) | Daily | Slack + Google Sheets | ~$0.45/month for 5 competitors |
 
 Costs are the Actors' pay-per-result prices on the Apify Free and Starter plans (higher plans pay less). You pay only for results; there is no separate compute charge for these Actors. The Apify Free plan includes $5 of usage every month, which covers recipes 2, 3 and 4 running together every month.
 
