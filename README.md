@@ -19,6 +19,7 @@ The data comes from public [Apify](https://apify.com) Actors by **Fast Data** ([
 | 5 | [Bulk-upscale product images from a sheet](5-bulk-image-upscale/) | [AI Image Upscaler](https://apify.com/fast_data_asap/ai-image-upscaler) | Manual | Google Drive + Google Sheets | $0.015 per image |
 | 6 | [PDF inbox to Markdown and AI summary](6-pdf-inbox-to-markdown/) | [Document to Markdown](https://apify.com/fast_data_asap/document-to-markdown) | New file in Drive / webhook | Google Docs (+ OpenAI) | $0.0015 per page |
 | 7 | [Competitor product & page alert (sitemap changes)](7-competitor-sitemap-alert/) | [Sitemap Change Monitor](https://apify.com/fast_data_asap/sitemap-change-monitor) | Daily | Slack + Google Sheets | ~$0.45/month for 5 competitors |
+| 8 | [AI finance assistant: check incoming e-invoices](8-ai-finance-assistant-einvoice-check/) | [E-Invoice Parser](https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser) + [IBAN](https://apify.com/fast_data_asap/iban-validator-bank-lookup), [VAT/VIES](https://apify.com/fast_data_asap/eu-vat-number-validator), [BaFin](https://apify.com/fast_data_asap/bafin-investor-warnings) checks | New file in Drive / webhook | Google Sheets + Slack | $0.0145 per invoice |
 
 Costs are the Actors' pay-per-result prices on the Apify Free and Starter plans (higher plans pay less). You pay only for results; there is no separate compute charge for these Actors. The Apify Free plan includes $5 of usage every month, which covers recipes 2, 3 and 4 running together every month.
 
@@ -67,10 +68,10 @@ Every workflow was imported into n8n 2.43 and checked against n8n's own node def
 All Fast Data Actors can also be called directly by AI agents (Claude, Claude Code, Cursor, VS Code) through **Apify's hosted MCP server**, limited to our Actors:
 
 ```
-https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
+https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
 ```
 
-Add it as a custom connector in Claude (sign in to Apify via OAuth), or send `Authorization: Bearer <APIFY_TOKEN>` from Cursor or Claude Code. The server is run by Apify, not by us; runs are billed to your Apify account at the Actors' normal prices. Copy-paste configs for each client: [mcp/README.md](mcp/). Registry entry: `io.github.ichkifokkus/fast-data` ([server.json](server.json)).
+Add it as a custom connector in Claude (sign in to Apify via OAuth), or send `Authorization: Bearer <APIFY_TOKEN>` from Cursor or Claude Code. The server is run by Apify, not by us; runs are billed to your Apify account at the Actors' normal prices. Only need the finance and sales tools (e-invoices, IBAN/VAT/BaFin checks, tenders, shop leads, jobs)? Use the smaller [Finance & Sales pack](mcp/#finance--sales-pack). Copy-paste configs for each client: [mcp/README.md](mcp/). Registry entry: `io.github.ichkifokkus/fast-data` ([server.json](server.json)).
 
 ## License
 

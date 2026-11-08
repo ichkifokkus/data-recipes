@@ -10,13 +10,26 @@ Registry name: `io.github.ichkifokkus/fast-data` (see [`server.json`](../server.
 
 ## Tools you get
 
+**Finance & sales (DACH/EU)**
+
+| Actor | What the agent can do with it |
+|---|---|
+| [XRechnung & ZUGFeRD Parser](https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser) | Turn German/EU e-invoices (XRechnung UBL/CII, ZUGFeRD/Factur-X PDF) into JSON: seller, IBAN, totals, VAT, plausibility warnings |
+| [IBAN Validator & Bank Lookup](https://apify.com/fast_data_asap/iban-validator-bank-lookup) | Validate IBANs (checksum, SEPA) and get bank name/BIC from official registries |
+| [EU VAT Number Validator (VIES)](https://apify.com/fast_data_asap/eu-vat-number-validator) | Check EU VAT IDs against VIES, with company name where the country shares it |
+| [BaFin Warnings](https://apify.com/fast_data_asap/bafin-investor-warnings) | List current BaFin warnings or screen company names/domains against them |
+| [German Public Tenders (service.bund.de)](https://apify.com/fast_data_asap/german-public-tenders-bund) | Search German public tenders by keyword, region, category |
+| [DACH Shop Lead Profiler](https://apify.com/fast_data_asap/dach-shop-lead-profiler) | Profile DE/AT/CH online shops: shop system, payments, Impressum company and contact |
+| [Job Search API](https://apify.com/fast_data_asap/job-search-api) | Search job postings (hiring signals) |
+| [Career Site Jobs API](https://apify.com/fast_data_asap/career-site-jobs-api) | Job postings from company career sites (Workday, Greenhouse, Lever and more) |
+
+**Content, documents and images**
+
 | Actor | What the agent can do with it |
 |---|---|
 | [YouTube Transcript Scraper](https://apify.com/fast_data_asap/youtube-transcript-scraper) | Get transcripts of YouTube videos/channels |
 | [Google News Scraper](https://apify.com/fast_data_asap/google-news-scraper) | Search Google News articles for a query |
 | [Google Trends Scraper](https://apify.com/fast_data_asap/google-trends-scraper) | Interest over time / related queries for keywords |
-| [Job Search API](https://apify.com/fast_data_asap/job-search-api) | Search job postings |
-| [Career Site Jobs API](https://apify.com/fast_data_asap/career-site-jobs-api) | Job postings from company career sites |
 | [Document to Markdown](https://apify.com/fast_data_asap/document-to-markdown) | Convert PDFs and other documents to Markdown |
 | [AI Image Upscaler](https://apify.com/fast_data_asap/ai-image-upscaler) | Upscale images |
 | [AI Background Remover](https://apify.com/fast_data_asap/ai-background-remover) | Remove image backgrounds |
@@ -27,10 +40,25 @@ See each Actor page for the exact input fields and prices.
 ## Server URL
 
 ```
-https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
+https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
 ```
 
 Want fewer tools? Delete Actors from the `tools=` list (comma-separated, `owner/actor-name`).
+
+## Finance & Sales pack
+
+A smaller, focused variant with only the eight finance and sales tools above. Fewer tools means a shorter tool list for the model and fewer wrong picks, so use this one for accounts-payable, KYC and lead-research agents:
+
+```
+https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api
+```
+
+Use it exactly like the full URL in the setup steps below (just swap the URL). Example for Claude Code:
+
+```bash
+claude mcp add --transport http fast-data-finance "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api" \
+  --header "Authorization: Bearer $APIFY_TOKEN"
+```
 
 ## Authentication
 
@@ -46,7 +74,7 @@ Want fewer tools? Delete Actors from the `tools=` list (comma-separated, `owner/
 ### Claude Code
 
 ```bash
-claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader" \
+claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader" \
   --header "Authorization: Bearer $APIFY_TOKEN"
 ```
 
@@ -56,7 +84,7 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
 {
   "mcpServers": {
     "fast-data": {
-      "url": "https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader",
+      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader",
       "headers": { "Authorization": "Bearer YOUR_APIFY_TOKEN" }
     }
   }
@@ -70,7 +98,7 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
   "servers": {
     "fast-data": {
       "type": "http",
-      "url": "https://mcp.apify.com/?tools=fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader"
+      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader"
     }
   }
 }
@@ -82,6 +110,9 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
 - "What did Google News report about <company> in the last 24 hours?"
 - "Is OpenAI hiring more engineers in Europe this month? Use the job search tool."
 - "Convert this PDF to Markdown: https://.../report.pdf"
+- "Parse this XRechnung, then check the IBAN and the seller's VAT ID: https://.../invoice.xml"
+- "Is the company 'Example Trading Ltd' on the BaFin warning list?"
+- "Find German public tenders for 'IT-Sicherheit' in Bayern and list their deadlines."
 
 ## Notes
 

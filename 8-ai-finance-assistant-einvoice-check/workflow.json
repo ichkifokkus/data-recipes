@@ -1,0 +1,427 @@
+{
+  "name": "Data Recipe: AI finance assistant - check incoming e-invoices",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI finance assistant: check incoming e-invoices\nDrop an XRechnung XML or ZUGFeRD/Factur-X PDF into a Google Drive folder - or POST its URL to the webhook. Four Fast Data Actors parse it and check the supplier: [E-Invoice Parser](https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser), [IBAN Validator](https://apify.com/fast_data_asap/iban-validator-bank-lookup), [EU VAT Validator (VIES)](https://apify.com/fast_data_asap/eu-vat-number-validator), [BaFin Warnings](https://apify.com/fast_data_asap/bafin-investor-warnings). A traffic light (green/yellow/red) with reasons lands in Google Sheets; red invoices go to Slack.\n\n**Setup (10 min)**\n1. Create a Drive folder `Eingangsrechnungen` and share it as *Anyone with the link: Viewer* (the Actor downloads by link).\n2. All four HTTP nodes: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n3. Connect Google Drive in the trigger and pick the folder; connect Google Sheets (tab `Eingangsrechnungen`) and Slack. E-mail node is optional (disabled).\n4. Activate. Drive is polled every minute.\n\nCost per invoice: $0.003 parse + $0.0005 IBAN + $0.001 VAT + $0.01 BaFin = **$0.0145** (repeat suppliers in one run are checked once).\nTechnical pre-check only, not tax or legal advice.",
+        "height": 560,
+        "width": 620
+      },
+      "id": "1c2c6c87-8bd3-5d2a-806d-28ba141401f7",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -600
+      ]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "id": "a7874b5e-c240-53ee-af2b-13e3b49426af",
+      "name": "New invoice in Drive",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "einvoice-check",
+        "options": {}
+      },
+      "id": "054bebc0-36f2-5d06-8bf8-5a3a685929d9",
+      "name": "Webhook: check invoice URL",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        200
+      ],
+      "webhookId": "50f9edab-2b98-5820-9eef-e9a055275c8f",
+      "notesInFlow": true,
+      "notes": "Optional second entry: POST {\"url\": \"https://.../invoice.xml\", \"name\": \"optional\"} or {\"urls\": [...]}"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turns new Drive files and webhook calls into ONE item { files: [{ url, name }] },\n// so each Actor below starts once per execution, however many invoices arrived.\n// Drive files must be readable by link (see Setup). Only XML and PDF files are passed on.\nconst files = [];\nconst add = (url, name) => {\n  url = String(url || '').trim();\n  if (url && !files.some(f => f.url === url)) files.push({ url, name: name || url.split('/').pop().split('?')[0] });\n};\nfor (const item of $input.all()) {\n  const j = item.json;\n  if (j.body && (j.body.url || j.body.urls)) {   // Webhook: POST { \"url\": \"https://...\", \"name\": \"optional\" } or { \"urls\": [...] }\n    if (j.body.url) add(j.body.url, j.body.name);\n    for (const u of j.body.urls || []) add(u);\n    continue;\n  }\n  if (!j.id) continue;                                    // not a Drive file\n  const isXml = /xml/i.test(j.mimeType || '') || /\\.xml$/i.test(j.name || '');\n  const isPdf = j.mimeType === 'application/pdf' || /\\.pdf$/i.test(j.name || '');\n  if (!isXml && !isPdf) continue;                         // folders, images, Google Docs ...\n  add(`https://drive.google.com/uc?export=download&id=${j.id}`, j.name);\n}\nreturn files.length ? [{ json: { files } }] : [];\n"
+      },
+      "id": "08aaf6b6-8931-5285-a123-f2caa5581475",
+      "name": "Collect invoice files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~xrechnung-zugferd-einvoice-parser/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ fileUrls: $json.files.map(f => f.url), includeLineItems: false }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "0d52e0ce-a4d1-5696-b105-8a03ffc68436",
+      "name": "Parse e-invoices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser: XRechnung (UBL/CII) and ZUGFeRD/Factur-X PDF to JSON. One row per file; only parsed invoices are charged."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collects the values to check from all parsed invoices: IBANs, seller VAT IDs and seller names.\n// Duplicates are removed, so ten invoices from the same supplier cost one VAT check and one BaFin screening.\nconst norm = s => String(s || '').replace(/^IBAN/i, '').replace(/[\\s.\\-]/g, '').toUpperCase();\nconst uniq = a => [...new Set(a.filter(Boolean))];\nconst rows = $input.all().map(i => i.json).filter(r => r.status === 'ok');\nreturn [{ json: {\n  ibans: uniq(rows.map(r => norm(r.iban))),\n  vatNumbers: uniq(rows.map(r => norm(r.seller && r.seller.vatId))),\n  names: uniq(rows.map(r => String((r.seller && r.seller.name) || '').trim())),\n} }];\n"
+      },
+      "id": "66cd29ca-2d94-562b-bcd6-0b96f6163e19",
+      "name": "Collect check inputs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~iban-validator-bank-lookup/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ ibans: $('Collect check inputs').first().json.ibans, includeBankInfo: true }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "888f46b6-b544-57e6-859d-cc455acd66bc",
+      "name": "Check IBANs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/iban-validator-bank-lookup: checksum, length, SEPA flag, bank name/BIC from the Bundesbank BLZ file.",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~eu-vat-number-validator/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ vatNumbers: $('Collect check inputs').first().json.vatNumbers, maxRetries: 3 }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "274fa273-185f-585a-be4d-3c2643c85c29",
+      "name": "Check VAT IDs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/eu-vat-number-validator against the EU VIES service. Add \"requesterVatNumber\": \"DE...\" (your own VAT ID) to get a consultation number as proof.",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~bafin-investor-warnings/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ mode: 'screen', queries: $('Collect check inputs').first().json.names, minScore: 85, maxMatchesPerQuery: 1, includeMeasures: true }) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "ab34e106-ec95-52b9-bffc-dcdc461cf3e7",
+      "name": "Screen BaFin warnings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Runs apify.com/fast_data_asap/bafin-investor-warnings in screen mode: fuzzy match of the seller names against current BaFin warnings and measures.",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Builds the traffic light per invoice: red = do not pay before a human has checked,\n// yellow = something could not be verified, green = all automatic checks passed.\n// This is a technical pre-check, not tax or legal advice.\nconst norm = s => String(s || '').replace(/^IBAN/i, '').replace(/[\\s.\\-]/g, '').toUpperCase();\nconst simple = s => String(s || '').toLowerCase().replace(/\\b(gmbh|ag|kg|ug|se|mbh|co|ltd|limited|sarl|sas|bv|nv|srl|spa)\\b|[^a-z0-9äöüß]/g, '');\nconst ibanRows = $('Check IBANs').all().map(i => i.json).filter(r => r.input);\nconst vatRows = $('Check VAT IDs').all().map(i => i.json).filter(r => r.input);\nconst bafinRows = $('Screen BaFin warnings').all().map(i => i.json).filter(r => r.query);\nconst files = $('Collect invoice files').first().json.files;\n\nreturn $('Parse e-invoices').all().map(({ json: p }) => {\n  const red = [], yellow = [];\n  const s = p.seller || {};\n  const file = (files.find(f => f.url === p.fileUrl) || {}).name || p.fileUrl;\n\n  // 1. Structured e-invoice?\n  if (p.status !== 'ok') yellow.push(`Not readable as XRechnung/ZUGFeRD (${String(p.error || p.status).slice(0, 120)}) - check manually`);\n  if (p.validationWarningCount > 0) yellow.push(`${p.validationWarningCount} plausibility warning(s): ${p.validationWarnings[0]}`);\n\n  // 2. IBAN\n  let bank = '';\n  if (p.status === 'ok') {\n    const i = ibanRows.find(r => norm(r.input) === norm(p.iban));\n    if (!p.iban) yellow.push('No IBAN on the invoice (direct debit, card or other payment means?)');\n    else if (!i) yellow.push('IBAN check not available - run again');\n    else if (!i.valid) red.push(`IBAN ${i.iban || p.iban} is invalid: ${i.error || 'checksum/format error'}`);\n    else {\n      bank = [i.bankName, i.bic].filter(Boolean).join(' / ');\n      if (i.error) yellow.push(`IBAN checksum OK, but: ${i.error}`);\n      if (s.country && i.countryCode && i.countryCode !== s.country) yellow.push(`IBAN country ${i.countryCode} differs from seller country ${s.country}`);\n      if (i.sepa === false) yellow.push(`IBAN country ${i.countryCode} is outside SEPA`);\n    }\n  }\n\n  // 3. Seller VAT ID (VIES)\n  let vies = '';\n  if (p.status === 'ok') {\n    const vat = norm(s.vatId);\n    const v = vatRows.find(r => norm(r.fullVatNumber || r.input) === vat || norm(r.input) === vat);\n    vies = v ? v.status : (vat ? 'not checked' : 'missing');\n    if (!vat) yellow.push(s.taxNumber ? 'No VAT ID on the invoice, only a tax number (Steuernummer) - VIES check not possible' : 'No seller VAT ID on the invoice');\n    else if (!v) yellow.push('VAT ID check not available - run again');\n    else if (v.status === 'invalid') red.push(`VAT ID ${v.fullVatNumber} is not valid according to VIES`);\n    else if (v.status === 'format_error') red.push(`VAT ID ${s.vatId} has an invalid format`);\n    else if (v.status !== 'valid') yellow.push(`VIES could not answer for ${v.fullVatNumber || vat} (${v.status}) - check again later`);\n    else if (v.name && simple(v.name) && !simple(v.name).includes(simple(s.name)) && !simple(s.name).includes(simple(v.name)))\n      yellow.push(`VIES name \"${v.name}\" differs from invoice name \"${s.name}\"`);\n  }\n\n  // 4. BaFin warnings (screened by seller name)\n  let bafin = '';\n  if (p.status === 'ok' && s.name) {\n    const b = bafinRows.find(r => r.query === String(s.name).trim());\n    if (!b) yellow.push('BaFin screening not available - run again');\n    else if (b.matched) { bafin = `${b.title} (${b.url})`; red.push(`Seller matches a BaFin warning (score ${b.matchScore}): ${b.title} ${b.url}`); }\n    else if (b.matchScore >= 70) yellow.push(`Seller name is similar to a BaFin warning (score ${b.matchScore}) - check bafin.de`);\n  }\n\n  const light = red.length ? 'red' : yellow.length ? 'yellow' : 'green';\n  return { json: {\n    checked_at: $now.toFormat('yyyy-MM-dd HH:mm'),\n    light,\n    reasons: [...red, ...yellow].join('; ') || 'all automatic checks passed',\n    file,\n    invoice_number: p.invoiceNumber || '',\n    issue_date: p.issueDate || '',\n    due_date: p.dueDate || '',\n    seller: s.name || '',\n    seller_vat_id: s.vatId || '',\n    vies_status: vies,\n    iban: p.iban || '',\n    bank,\n    bafin_match: bafin,\n    amount_due: p.payableAmount ?? '',\n    currency: p.currency || '',\n    format: p.format || '',\n    source_url: p.fileUrl,\n  } };\n});\n"
+      },
+      "id": "4957b1f5-0733-56e5-82d9-0926be27668e",
+      "name": "Traffic light",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Eingangsrechnungen",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "4fb68ef8-e66d-5f63-98c0-ce6e658c8b36",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1760,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// One alert for all red invoices of this run. No red invoice = nothing is sent.\nconst red = $input.all().map(i => i.json).filter(r => r.light === 'red');\nif (!red.length) return [];\nconst line = r => `${r.seller || r.file} | invoice ${r.invoice_number} | ${r.amount_due} ${r.currency}\\n   ${r.reasons}`;\nconst text = `:red_circle: ${red.length} incoming invoice(s) need a manual check before payment\\n\\n` + red.map(line).join('\\n\\n');\nconst esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');\nreturn [{ json: {\n  text,\n  subject: `${red.length} incoming invoice(s) flagged red`,\n  html: '<p>These invoices need a manual check before payment:</p><ul>' +\n    red.map(r => `<li><b>${esc(r.seller || r.file)}</b>, invoice ${esc(r.invoice_number)}, ${esc(r.amount_due)} ${esc(r.currency)}<br>${esc(r.reasons)}</li>`).join('') + '</ul>',\n} }];\n"
+      },
+      "id": "fb69f217-158e-5e51-90c6-8f066e9915ac",
+      "name": "Red invoices only",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#accounts-payable",
+          "mode": "name"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false
+        }
+      },
+      "id": "01d55a98-791b-5c34-a85b-4a07b01d5c8d",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1980,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "alerts@example.com",
+        "toEmail": "accounting@example.com",
+        "subject": "={{ $json.subject }}",
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "ade5d671-9626-5161-8ded-2db16664ef3f",
+      "name": "Send e-mail",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1980,
+        340
+      ],
+      "disabled": true,
+      "notesInFlow": true,
+      "notes": "Optional: enable and add SMTP credentials to get red invoices by e-mail too."
+    }
+  ],
+  "connections": {
+    "New invoice in Drive": {
+      "main": [
+        [
+          {
+            "node": "Collect invoice files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook: check invoice URL": {
+      "main": [
+        [
+          {
+            "node": "Collect invoice files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect invoice files": {
+      "main": [
+        [
+          {
+            "node": "Parse e-invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse e-invoices": {
+      "main": [
+        [
+          {
+            "node": "Collect check inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect check inputs": {
+      "main": [
+        [
+          {
+            "node": "Check IBANs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check IBANs": {
+      "main": [
+        [
+          {
+            "node": "Check VAT IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check VAT IDs": {
+      "main": [
+        [
+          {
+            "node": "Screen BaFin warnings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Screen BaFin warnings": {
+      "main": [
+        [
+          {
+            "node": "Traffic light",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Traffic light": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Red invoices only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Red invoices only": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
