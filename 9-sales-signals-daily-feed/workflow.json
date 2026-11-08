@@ -1,0 +1,432 @@
+{
+  "name": "Data Recipe: Daily B2B sales-signal feed (tenders + hiring)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Daily B2B sales-signal feed\nEvery weekday at 7:00 two Fast Data actors run in parallel: [German Public Tenders](https://apify.com/fast_data_asap/german-public-tenders-bund) (service.bund.de) and [Career Site Jobs API](https://apify.com/fast_data_asap/career-site-jobs-api) (your target companies' career sites). A Code node turns both into one signal schema with a simple score, signals already in the Google Sheets log are dropped, new ones go to the sheet and Slack.\n\n**Setup (10 min)**\n1. Both HTTP nodes: Header Auth credential `Authorization` = `Bearer <Apify API token>`.\n2. Edit *Settings* (keywords, states, companies).\n3. Connect Google Sheets (tab `Signals`, header row in README) in both Sheets nodes, and Slack.\n4. Optional: enable *Create Pipedrive activity*.\n\nCost: $0.002 per tender, $0.002 per job returned.",
+        "height": 460,
+        "width": 560
+      },
+      "id": "28d13c3a-02d8-52cf-ad66-34c187ee97bc",
+      "name": "Setup",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -480
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * 1-5"
+            }
+          ]
+        }
+      },
+      "id": "06f08b7e-9070-5583-8aec-d90edaca5d11",
+      "name": "Weekdays 7:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"tenderKeywords\": [\n    \"Software\"\n  ],\n  \"tenderStates\": [],\n  \"excludeKeywords\": [],\n  \"lookbackDays\": 0,\n  \"maxTenders\": 50,\n  \"targetCompanies\": [\n    \"teamtailor:tibber\",\n    \"ashby:n8n\",\n    \"greenhouse:celonis\"\n  ],\n  \"maxJobsPerCompany\": 25\n}",
+        "options": {}
+      },
+      "id": "5d28ddb1-e4d0-5bbd-a8e3-55ea09846d16",
+      "name": "Settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        100
+      ],
+      "notesInFlow": true,
+      "notes": "Keywords, states and target companies. lookbackDays 0 = automatic: 4 days on Mondays (weekend), 2 days otherwise. The sheet log removes the one-day overlap."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~german-public-tenders-bund/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  keywords: $json.tenderKeywords,\n  states: $json.tenderStates,\n  excludeKeywords: $json.excludeKeywords,\n  lastDays: $json.lookbackDays || ($now.weekday === 1 ? 4 : 2),\n  maxItems: $json.maxTenders,\n  includeDetails: true\n}) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "8958ae3e-3e25-555a-8e28-7a7fd3800e06",
+      "name": "Get public tenders",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        0
+      ],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "notes": "apify.com/fast_data_asap/german-public-tenders-bund"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/fast_data_asap~career-site-jobs-api/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  companies: $json.targetCompanies,\n  postedWithinDays: $json.lookbackDays || ($now.weekday === 1 ? 4 : 2),\n  maxJobsPerCompany: $json.maxJobsPerCompany,\n  includeDescription: false\n}) }}",
+        "options": {
+          "timeout": 310000
+        }
+      },
+      "id": "cc0f16da-f9e6-56c5-ad1a-085c413f8578",
+      "name": "Get hiring signals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ],
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "notes": "apify.com/fast_data_asap/career-site-jobs-api"
+    },
+    {
+      "parameters": {},
+      "id": "1f3dcbb4-012e-5d7a-bd4c-e0b002dc9cdd",
+      "name": "Combine",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        700,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turns tenders and job postings into one signal schema and scores them.\n// Schema: signalType, organisation, title, location, date, deadline, url, score (+ reason, signalId, found_at)\nconst HIGH_IF_DEADLINE_WITHIN_DAYS = 21; // tender with offer deadline < 21 days = high\nconst HIGH_IF_JOBS_PER_COMPANY = 3;      // >= 3 new roles at one company = high\nconst LEADERSHIP = /\\b(head of|director|vp|vice president|chief|country manager|general manager)\\b/i;\n\nconst lookback = $('Settings').first().json.lookbackDays || ($now.weekday === 1 ? 4 : 2);\nconst now = new Date();\nconst daysUntil = d => (d ? Math.ceil((new Date(d) - now) / 86400000) : null);\nconst clean = s => String(s || '').replace(/\\s+/g, ' ').trim();\nconst rows = $input.all().map(i => i.json);\nconst foundAt = $now.toFormat('yyyy-MM-dd');\nconst signals = [];\n\n// 1) Public tenders (service.bund.de)\nfor (const t of rows.filter(r => r.tenderId && r.url)) {\n  const due = t.deadline || t.publicationEnd || '';\n  const left = daysUntil(due);\n  if (left !== null && left < 0) continue; // already closed\n  const high = left !== null && left < HIGH_IF_DEADLINE_WITHIN_DAYS;\n  signals.push({\n    signalId: 'tender:' + t.url,\n    found_at: foundAt,\n    signalType: 'public_tender',\n    organisation: clean(t.contractingAuthority),\n    title: clean(t.title),\n    location: [t.city, t.state].filter(Boolean).join(', ') || clean(t.location),\n    date: String(t.publishedAt || '').slice(0, 10),\n    deadline: String(due).slice(0, 10),\n    url: t.url,\n    score: high ? 'high' : 'medium',\n    reason: left === null ? 'no deadline published'\n      : `${left} day(s) to ${t.deadline ? 'offer deadline' : 'end of publication'}`,\n  });\n}\n\n// 2) Hiring signals (company career sites)\nconst jobs = rows.filter(r => r.jobId && r.url && r.title);\nconst perCompany = {};\nfor (const j of jobs) perCompany[j.company] = (perCompany[j.company] || 0) + 1;\nfor (const j of jobs) {\n  const n = perCompany[j.company];\n  const score = n >= HIGH_IF_JOBS_PER_COMPANY ? 'high' : (LEADERSHIP.test(j.title) || n === 2 ? 'medium' : 'low');\n  signals.push({\n    signalId: 'job:' + j.url,\n    found_at: foundAt,\n    signalType: 'hiring',\n    organisation: clean(j.company),\n    title: clean(j.title),\n    location: clean(j.location).slice(0, 120),\n    date: String(j.postedAt || '').slice(0, 10),\n    deadline: '',\n    url: j.url,\n    score,\n    reason: `${n} role(s) posted at ${clean(j.company)} in the last ${lookback} day(s)`,\n  });\n}\n\nconst order = { high: 0, medium: 1, low: 2 };\nsignals.sort((a, b) => order[a.score] - order[b.score]);\nreturn signals.map(s => ({ json: s }));\n"
+      },
+      "id": "0a12ca24-fbb6-5939-994e-945ca6a085e7",
+      "name": "Normalize & score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Signals",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "af89c455-2f2f-539d-ab3f-c0d9150e70e2",
+      "name": "Read signal log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1140,
+        100
+      ],
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "notesInFlow": true,
+      "notes": "Same spreadsheet and tab as 'Log new signals'."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Drops every signal whose signalId is already in the Google Sheets log.\nconst seen = new Set($input.all().map(i => String(i.json.signalId || '')).filter(Boolean));\nreturn $('Normalize & score').all()\n  .filter(i => !seen.has(i.json.signalId))\n  .map(i => ({ json: i.json }));\n"
+      },
+      "id": "5b635df4-123c-5959-acd9-cbf00048a89d",
+      "name": "Keep new signals only",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Signals",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "76f065e1-4d5c-5a94-81da-ec6d5af2eb89",
+      "name": "Log new signals",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1600,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// One Slack message per morning: high signals first, then a count of the rest.\nconst SHOW = 10;\nconst signals = $input.all().map(i => i.json);\nif (signals.length === 0) return [];\nconst esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\\|/g, '-');\nconst count = (k, v) => signals.filter(s => s[k] === v).length;\nconst label = { public_tender: 'Tender', hiring: 'Hiring' };\nlet text = `*Sales signals*: ${signals.length} new (${count('score', 'high')} high, ${count('score', 'medium')} medium, ${count('score', 'low')} low)\\n`;\ntext += `${count('signalType', 'public_tender')} public tender(s), ${count('signalType', 'hiring')} job posting(s)\\n`;\nconst top = signals.filter(s => s.score !== 'low').slice(0, SHOW);\nfor (const s of top) {\n  const due = s.deadline ? ` - due ${s.deadline}` : '';\n  text += `\\n[${s.score}] ${label[s.signalType] || s.signalType}: *${esc(s.organisation)}* - <${s.url}|${esc(s.title).slice(0, 110)}>${due}\\n    _${esc(s.reason)}_`;\n}\nconst rest = signals.length - top.length;\nif (rest > 0) text += `\\n\\n...and ${rest} more in the sheet`;\nreturn [{ json: { text } }];\n"
+      },
+      "id": "1e67ddd7-2cb2-5f2d-aae0-5648c1cd245e",
+      "name": "Build Slack digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#sales-signals",
+          "mode": "name"
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "unfurl_links": false
+        }
+      },
+      "id": "1a1a9b73-7511-5c39-ba06-9b5454704e6b",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1820,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "92a78658-2bfd-5a5f-821a-cb4b6e4ece85",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1e085481-eb10-5c27-bb85-0f4140d3279b",
+      "name": "High score only",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "activity",
+        "operation": "create",
+        "subject": "={{ ($json.signalType === 'public_tender' ? 'Tender: ' : 'Hiring: ') + $json.organisation }}",
+        "done": "0",
+        "type": "task",
+        "additionalFields": {
+          "due_date": "={{ $now.plus({ days: 1 }).toFormat('yyyy-MM-dd') }}",
+          "note": "={{ $json.title }}<br>{{ $json.location }}<br>{{ $json.reason }}<br><a href=\"{{ $json.url }}\">{{ $json.url }}</a>"
+        }
+      },
+      "id": "bb86acba-9173-5649-8c81-2d789122dfd0",
+      "name": "Create Pipedrive activity",
+      "type": "n8n-nodes-base.pipedrive",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        280
+      ],
+      "disabled": true,
+      "notesInFlow": true,
+      "notes": "Example, disabled. Creates a task per high signal. Swap for HubSpot or your CRM."
+    }
+  ],
+  "connections": {
+    "Weekdays 7:00": {
+      "main": [
+        [
+          {
+            "node": "Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings": {
+      "main": [
+        [
+          {
+            "node": "Get public tenders",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get hiring signals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get public tenders": {
+      "main": [
+        [
+          {
+            "node": "Combine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get hiring signals": {
+      "main": [
+        [
+          {
+            "node": "Combine",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine": {
+      "main": [
+        [
+          {
+            "node": "Normalize & score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & score": {
+      "main": [
+        [
+          {
+            "node": "Read signal log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read signal log": {
+      "main": [
+        [
+          {
+            "node": "Keep new signals only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep new signals only": {
+      "main": [
+        [
+          {
+            "node": "Log new signals",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack digest",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "High score only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack digest": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "High score only": {
+      "main": [
+        [
+          {
+            "node": "Create Pipedrive activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
