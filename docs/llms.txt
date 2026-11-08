@@ -14,6 +14,7 @@ Without MCP, run a tool with `POST https://api.apify.com/v2/acts/fast_data_asap~
 - [MCP setup](https://github.com/ichkifokkus/data-recipes/blob/main/mcp/README.md): server URLs and configs for Claude, Claude Code, Cursor, VS Code
 - [MCP Registry entry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.ichkifokkus/fast-data): server.json as published
 - [Pay per call with x402](https://docs.apify.com/platform/integrations/x402): prepaid Apify token without an account
+- [Agent tool catalog](https://github.com/ichkifokkus/data-recipes/tree/main/catalog): curated list of third-party and Fast Data tools/MCP servers for German/EU business data; machine-readable at [catalog.json](https://raw.githubusercontent.com/ichkifokkus/data-recipes/main/catalog/catalog.json)
 
 ## Finance
 
