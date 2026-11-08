@@ -74,6 +74,12 @@ https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fa
 
 Add it as a custom connector in Claude (sign in to Apify via OAuth), or send `Authorization: Bearer <APIFY_TOKEN>` from Cursor or Claude Code. The server is run by Apify, not by us; runs are billed to your Apify account at the Actors' normal prices. Only need the finance and sales tools (e-invoices, IBAN/VAT/BaFin checks, tenders, shop leads, jobs)? Use the smaller [Finance & Sales pack](mcp/#finance--sales-pack). Copy-paste configs for each client: [mcp/README.md](mcp/). Registry entry: `io.github.ichkifokkus/fast-data` ([server.json](server.json)).
 
+## For AI agents
+
+- Overview page: [ichkifokkus.github.io/data-recipes](https://ichkifokkus.github.io/data-recipes/) (all public Fast Data tools with prices)
+- [llms.txt](https://ichkifokkus.github.io/data-recipes/llms.txt) ([source](docs/llms.txt)) and [tools.json](https://ichkifokkus.github.io/data-recipes/tools.json) ([source](docs/tools.json)): slug, description, category, price, store URL and MCP tool ID per tool
+- MCP: remote server via Apify, registry name `io.github.ichkifokkus/fast-data`, setup in [mcp/README.md](mcp/); agents without an Apify account can pay per call with [x402](mcp/#pay-per-call-with-x402--no-account-needed)
+
 ## License
 
 The workflows and texts in this folder are free to use, copy and change (MIT). The data you collect belongs to its owners; respect copyright, site terms and data protection rules.

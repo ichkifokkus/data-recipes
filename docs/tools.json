@@ -1,0 +1,353 @@
+[
+  {
+    "slug": "xrechnung-zugferd-einvoice-parser",
+    "name": "XRechnung & ZUGFeRD / Factur-X Parser",
+    "description": "Turns German/EU e-invoices (XRechnung UBL/CII, ZUGFeRD, Factur-X PDF) into JSON with seller, buyer, IBAN, totals, VAT breakdown, line items and plausibility warnings.",
+    "category": "finance",
+    "pricing": "$0.003 per parsed e-invoice ($3 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser",
+    "mcpToolId": "fast_data_asap/xrechnung-zugferd-einvoice-parser"
+  },
+  {
+    "slug": "iban-validator-bank-lookup",
+    "name": "IBAN Validator & Bank Lookup (BIC, Bank Name)",
+    "description": "Validates IBANs in bulk (structure, MOD-97 and national checksums, SEPA flag) and adds bank name, BIC and city from official registries.",
+    "category": "finance",
+    "pricing": "$0.0005 per IBAN validated ($0.50 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/iban-validator-bank-lookup",
+    "mcpToolId": "fast_data_asap/iban-validator-bank-lookup"
+  },
+  {
+    "slug": "eu-vat-number-validator",
+    "name": "EU VAT Number Validator (VIES)",
+    "description": "Checks EU VAT numbers against the official VIES service and returns validity plus company name and address where the country shares them.",
+    "category": "finance",
+    "pricing": "$0.001 per VAT number checked ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/eu-vat-number-validator",
+    "mcpToolId": "fast_data_asap/eu-vat-number-validator"
+  },
+  {
+    "slug": "bafin-investor-warnings",
+    "name": "BaFin Warnings Scraper",
+    "description": "Lists current BaFin investor warnings and screens company names or domains against them with a fuzzy match score for KYC/AML checks.",
+    "category": "finance",
+    "pricing": "$0.002 per BaFin warning returned ($2 per 1,000); $0.01 per name screened",
+    "storeUrl": "https://apify.com/fast_data_asap/bafin-investor-warnings",
+    "mcpToolId": "fast_data_asap/bafin-investor-warnings"
+  },
+  {
+    "slug": "defillama-defi-data",
+    "name": "DefiLlama Data Export",
+    "description": "Exports DefiLlama DeFi data (TVL, stablecoin supply, DEX volumes, fees, yields) as flat tables.",
+    "category": "finance",
+    "pricing": "$0.0002 per row ($0.20 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/defillama-defi-data",
+    "mcpToolId": "fast_data_asap/defillama-defi-data"
+  },
+  {
+    "slug": "german-public-tenders-bund",
+    "name": "German Public Tenders Scraper",
+    "description": "Searches German public tenders on service.bund.de by keyword, federal state, category and date, with authority, CPV and deadline.",
+    "category": "sales",
+    "pricing": "$0.002 per tender ($2 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/german-public-tenders-bund",
+    "mcpToolId": "fast_data_asap/german-public-tenders-bund"
+  },
+  {
+    "slug": "dach-shop-lead-profiler",
+    "name": "E-commerce Lead Enrichment",
+    "description": "Profiles DE/AT/CH online shops from a domain: shop system, payment methods, apps, Impressum company and contact, catalogue size.",
+    "category": "sales",
+    "pricing": "$0.02 per shop lead profile; plus $0.00005 per run start",
+    "storeUrl": "https://apify.com/fast_data_asap/dach-shop-lead-profiler",
+    "mcpToolId": "fast_data_asap/dach-shop-lead-profiler"
+  },
+  {
+    "slug": "sitemap-change-monitor",
+    "name": "Competitor Website Monitor",
+    "description": "Reports new, removed or updated URLs on competitor websites from their sitemaps, e.g. new products or landing pages.",
+    "category": "sales",
+    "pricing": "$0.003 per domain check ($3 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/sitemap-change-monitor",
+    "mcpToolId": "fast_data_asap/sitemap-change-monitor"
+  },
+  {
+    "slug": "woocommerce-store-products",
+    "name": "WooCommerce Products Scraper",
+    "description": "Reads products from any WooCommerce shop via its public Store API: prices, sale prices, stock, SKU, categories, variations.",
+    "category": "sales",
+    "pricing": "$0.0007 per product ($0.70 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/woocommerce-store-products",
+    "mcpToolId": "fast_data_asap/woocommerce-store-products"
+  },
+  {
+    "slug": "shop-shipping-returns-extractor",
+    "name": "Shipping & Returns Policy Extractor",
+    "description": "Extracts shipping costs, free-shipping threshold, delivery times, return window and withdrawal period from online shops.",
+    "category": "sales",
+    "pricing": "$0.003 per shop analysed ($3 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/shop-shipping-returns-extractor",
+    "mcpToolId": "fast_data_asap/shop-shipping-returns-extractor"
+  },
+  {
+    "slug": "job-search-api",
+    "name": "Arbeitsagentur Job Scraper & Job Search API",
+    "description": "Searches job postings by keyword, city and radius across the German Federal Employment Agency and remote job boards, de-duplicated.",
+    "category": "jobs",
+    "pricing": "$0.0025 per job ($2.50 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/job-search-api",
+    "mcpToolId": "fast_data_asap/job-search-api"
+  },
+  {
+    "slug": "career-site-jobs-api",
+    "name": "Career Site Jobs Scraper",
+    "description": "Gets every open job straight from company career sites (Workday, Greenhouse, Lever, Ashby and more), with a new-jobs-only mode for daily hiring signals.",
+    "category": "jobs",
+    "pricing": "$0.002 per job ($2 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/career-site-jobs-api",
+    "mcpToolId": "fast_data_asap/career-site-jobs-api"
+  },
+  {
+    "slug": "german-apprenticeships-ausbildung",
+    "name": "German Apprenticeships",
+    "description": "Searches German apprenticeship (Ausbildung) and dual-study offers from official Federal Employment Agency data.",
+    "category": "jobs",
+    "pricing": "$0.001 per offer ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/german-apprenticeships-ausbildung",
+    "mcpToolId": "fast_data_asap/german-apprenticeships-ausbildung"
+  },
+  {
+    "slug": "document-to-markdown",
+    "name": "PDF to Markdown for RAG",
+    "description": "Converts PDF, Word, PowerPoint, Excel, EPUB and images to clean Markdown with tables, and OCR for scans.",
+    "category": "content",
+    "pricing": "$0.0015 per page converted ($1.50 per 1,000); $0.005 per OCR page ($5 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/document-to-markdown",
+    "mcpToolId": "fast_data_asap/document-to-markdown"
+  },
+  {
+    "slug": "website-to-llm-markdown",
+    "name": "Website to Markdown for RAG",
+    "description": "Crawls a website or sitemap into clean Markdown, split into heading-aware chunks with token counts for RAG.",
+    "category": "content",
+    "pricing": "$0.0015 per page converted ($1.50 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/website-to-llm-markdown",
+    "mcpToolId": "fast_data_asap/website-to-llm-markdown"
+  },
+  {
+    "slug": "bulk-ocr-image-to-text",
+    "name": "Bulk OCR",
+    "description": "Extracts text from images and scanned PDFs in 100+ languages, as plain text, lines or words with bounding boxes.",
+    "category": "content",
+    "pricing": "$0.001 per OCR'd page ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/bulk-ocr-image-to-text",
+    "mcpToolId": "fast_data_asap/bulk-ocr-image-to-text"
+  },
+  {
+    "slug": "pdf-toolkit-merge-split-compress",
+    "name": "PDF Toolkit API",
+    "description": "Merges, splits, compresses and rotates PDFs by URL, converts pages to images or reads PDF metadata.",
+    "category": "content",
+    "pricing": "$0.003 per output file ($3 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/pdf-toolkit-merge-split-compress",
+    "mcpToolId": "fast_data_asap/pdf-toolkit-merge-split-compress"
+  },
+  {
+    "slug": "youtube-transcript-scraper",
+    "name": "YouTube Transcript Scraper",
+    "description": "Gets transcripts and subtitles of YouTube videos, Shorts, channels and playlists as text, timestamps or LLM chunks.",
+    "category": "content",
+    "pricing": "$0.002 per transcript ($2 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/youtube-transcript-scraper",
+    "mcpToolId": "fast_data_asap/youtube-transcript-scraper"
+  },
+  {
+    "slug": "google-news-scraper",
+    "name": "Google News Scraper",
+    "description": "Searches Google News by keyword and returns title, source, date, the real article URL and optional full text.",
+    "category": "content",
+    "pricing": "$0.0025 per article ($2.50 per 1,000); $0.0025 per full text add-on ($2.50 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/google-news-scraper",
+    "mcpToolId": "fast_data_asap/google-news-scraper"
+  },
+  {
+    "slug": "google-trends-scraper",
+    "name": "Google Trends Scraper",
+    "description": "Compares keywords on one Google Trends scale: interest over time, by region, related and rising queries.",
+    "category": "content",
+    "pricing": "$0.003 per result ($3 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/google-trends-scraper",
+    "mcpToolId": "fast_data_asap/google-trends-scraper"
+  },
+  {
+    "slug": "german-federal-court-decisions",
+    "name": "German Court Decisions",
+    "description": "Returns German federal court decisions (BGH, BVerfG, BAG and others) from the official open-data portal as JSON or Markdown.",
+    "category": "content",
+    "pricing": "$0.001 per decision ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/german-federal-court-decisions",
+    "mcpToolId": "fast_data_asap/german-federal-court-decisions"
+  },
+  {
+    "slug": "ai-image-upscaler",
+    "name": "AI Image Upscaler",
+    "description": "Upscales images 2x or 4x in bulk with Real-ESRGAN.",
+    "category": "media",
+    "pricing": "$0.015 per upscaled image; lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/ai-image-upscaler",
+    "mcpToolId": "fast_data_asap/ai-image-upscaler"
+  },
+  {
+    "slug": "ai-background-remover",
+    "name": "AI Background Remover",
+    "description": "Removes image backgrounds in bulk and returns transparent PNG/WebP or white-background JPG.",
+    "category": "media",
+    "pricing": "$0.006 per image processed ($6 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/ai-background-remover",
+    "mcpToolId": "fast_data_asap/ai-background-remover"
+  },
+  {
+    "slug": "bulk-image-downloader",
+    "name": "Bulk Image Downloader",
+    "description": "Downloads all images from a website or URL list as one ZIP, with size/type filters and format conversion.",
+    "category": "media",
+    "pricing": "$0.0035 per image saved ($3.50 per 1,000); lower on paid Apify plans",
+    "storeUrl": "https://apify.com/fast_data_asap/bulk-image-downloader",
+    "mcpToolId": "fast_data_asap/bulk-image-downloader"
+  },
+  {
+    "slug": "bulk-image-watermark-resize",
+    "name": "Bulk Image Watermark, Resize & Convert to WebP/AVIF",
+    "description": "Watermarks, resizes and converts images in bulk (WebP, AVIF, JPG, PNG) with marketplace presets.",
+    "category": "media",
+    "pricing": "$0.002 per processed image ($2 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/bulk-image-watermark-resize",
+    "mcpToolId": "fast_data_asap/bulk-image-watermark-resize"
+  },
+  {
+    "slug": "ai-image-metadata-detector",
+    "name": "AI Image Metadata Checker",
+    "description": "Checks images for AI-generation metadata (C2PA, IPTC DigitalSourceType, generator tags) and EXIF camera data.",
+    "category": "media",
+    "pricing": "$0.0015 per image analysed ($1.50 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/ai-image-metadata-detector",
+    "mcpToolId": "fast_data_asap/ai-image-metadata-detector"
+  },
+  {
+    "slug": "text-to-speech-kokoro",
+    "name": "Text to Speech MP3 (Open Voices, No API Key)",
+    "description": "Converts text to natural speech (MP3/WAV) with the open Kokoro TTS model, 41 voices.",
+    "category": "media",
+    "pricing": "$0.02 per 1,000 characters",
+    "storeUrl": "https://apify.com/fast_data_asap/text-to-speech-kokoro",
+    "mcpToolId": "fast_data_asap/text-to-speech-kokoro"
+  },
+  {
+    "slug": "qr-barcode-generator-reader",
+    "name": "QR Code & Barcode Generator + Reader (Bulk, PNG/SVG, Logo)",
+    "description": "Generates QR codes and barcodes (EAN, UPC, Code 128, Data Matrix) as PNG/SVG, or reads them from images.",
+    "category": "media",
+    "pricing": "$0.0005 per code ($0.50 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/qr-barcode-generator-reader",
+    "mcpToolId": "fast_data_asap/qr-barcode-generator-reader"
+  },
+  {
+    "slug": "german-shop-compliance-checker",
+    "name": "German Shop Legal Check",
+    "description": "Checks German online shops for common warning-letter risks: Impressum, unit prices (PAngV), old ODR link, accessibility (BFSG).",
+    "category": "dev",
+    "pricing": "$0.01 per shop checked; plus $0.00005 per run start",
+    "storeUrl": "https://apify.com/fast_data_asap/german-shop-compliance-checker",
+    "mcpToolId": "fast_data_asap/german-shop-compliance-checker"
+  },
+  {
+    "slug": "gpsr-product-page-checker",
+    "name": "GPSR Compliance Checker",
+    "description": "Checks product pages for EU GPSR information: manufacturer, EU responsible person, safety warnings, product ID.",
+    "category": "dev",
+    "pricing": "$0.005 per product page checked ($5 per 1,000); plus $0.00005 per run start",
+    "storeUrl": "https://apify.com/fast_data_asap/gpsr-product-page-checker",
+    "mcpToolId": "fast_data_asap/gpsr-product-page-checker"
+  },
+  {
+    "slug": "cookie-consent-tracker-checker",
+    "name": "Cookie & Tracker Consent Checker",
+    "description": "Loads pages in a real browser without consenting and lists cookies and trackers that run before consent (GDPR/TTDSG).",
+    "category": "dev",
+    "pricing": "$0.004 per page checked ($4 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/cookie-consent-tracker-checker",
+    "mcpToolId": "fast_data_asap/cookie-consent-tracker-checker"
+  },
+  {
+    "slug": "product-schema-checker",
+    "name": "Product Schema Checker",
+    "description": "Validates schema.org Product JSON-LD on product pages and scores it with fix hints.",
+    "category": "dev",
+    "pricing": "$0.002 per page checked ($2 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/product-schema-checker",
+    "mcpToolId": "fast_data_asap/product-schema-checker"
+  },
+  {
+    "slug": "ean-gtin-lookup",
+    "name": "EAN / GTIN / UPC Validator",
+    "description": "Validates EAN, UPC, GTIN and ISBN codes in bulk (check digit, type, GS1 prefix) with optional Open Food Facts data.",
+    "category": "dev",
+    "pricing": "$0.0002 per valid barcode processed ($0.20 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/ean-gtin-lookup",
+    "mcpToolId": "fast_data_asap/ean-gtin-lookup"
+  },
+  {
+    "slug": "shopify-llms-txt-generator",
+    "name": "Shopify llms.txt Generator",
+    "description": "Generates ready-to-upload llms.txt and llms-full.txt files for a Shopify store.",
+    "category": "dev",
+    "pricing": "$0.03 per llms.txt generated; plus $0.00005 per run start",
+    "storeUrl": "https://apify.com/fast_data_asap/shopify-llms-txt-generator",
+    "mcpToolId": "fast_data_asap/shopify-llms-txt-generator"
+  },
+  {
+    "slug": "ai-crawler-access-checker",
+    "name": "AI Crawler Checker",
+    "description": "Checks whether GPTBot, ClaudeBot, PerplexityBot and other AI crawlers can reach a site (robots.txt, blocking, llms.txt, JSON-LD).",
+    "category": "dev",
+    "pricing": "$0.005 per website checked ($5 per 1,000); plus $0.00005 per run start",
+    "storeUrl": "https://apify.com/fast_data_asap/ai-crawler-access-checker",
+    "mcpToolId": "fast_data_asap/ai-crawler-access-checker"
+  },
+  {
+    "slug": "broken-link-internal-link-checker",
+    "name": "Broken Link Checker & Internal Link Graph (Fast, No Browser)",
+    "description": "Crawls a website and finds broken links, redirect chains and links to noindex pages, plus an internal link graph.",
+    "category": "dev",
+    "pricing": "$0.001 per crawled page ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/broken-link-internal-link-checker",
+    "mcpToolId": "fast_data_asap/broken-link-internal-link-checker"
+  },
+  {
+    "slug": "readability-seo-content-checker",
+    "name": "Readability & SEO Content Checker",
+    "description": "Scores readability of pages or texts in English and German (Flesch, Wiener Sachtextformel and more) plus basic SEO checks.",
+    "category": "dev",
+    "pricing": "$0.002 per page or text analysed ($2 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/readability-seo-content-checker",
+    "mcpToolId": "fast_data_asap/readability-seo-content-checker"
+  },
+  {
+    "slug": "page-weight-carbon-checker",
+    "name": "Website Carbon & Page Weight Checker",
+    "description": "Measures page weight, requests and estimated CO2 per page view to find heavy pages.",
+    "category": "dev",
+    "pricing": "$0.004 per page analysed ($4 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/page-weight-carbon-checker",
+    "mcpToolId": "fast_data_asap/page-weight-carbon-checker"
+  },
+  {
+    "slug": "german-weather-dwd-open-data",
+    "name": "German Weather Data API (DWD)",
+    "description": "Returns hourly weather observations and forecasts for any place in Germany from DWD open data.",
+    "category": "dev",
+    "pricing": "$0.001 per location ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/german-weather-dwd-open-data",
+    "mcpToolId": "fast_data_asap/german-weather-dwd-open-data"
+  }
+]

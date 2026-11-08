@@ -114,6 +114,14 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
 - "Is the company 'Example Trading Ltd' on the BaFin warning list?"
 - "Find German public tenders for 'IT-Sicherheit' in Bayern and list their deadlines."
 
+## Pay per call with x402 – no account needed
+
+Agents that have no Apify account can pay with USDC stablecoins (Base or Solana) via the [x402 protocol](https://www.x402.org/):
+buy a prepaid Apify token (minimum $1, valid for 14 days, unused balance is not refunded), then send it as
+`Authorization: Bearer <prepaid-token>` to the server URLs above or to the Apify API. All Fast Data Actors run with
+limited permissions, so they work with prepaid tokens. Apify marks this as experimental; payments are processed by Apify.
+Step-by-step guide: [docs.apify.com/platform/integrations/x402](https://docs.apify.com/platform/integrations/x402).
+
 ## Notes
 
 - Don't put your token into files you commit. Use OAuth or your client's secret storage where possible.

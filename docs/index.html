@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fast Data – data tools for AI agents</title>
+<meta name="description" content="Data tools for AI agents in sales and finance (Germany/EU): e-invoices, IBAN/VAT/BaFin checks, public tenders, hiring signals, documents to Markdown. Callable via MCP or the Apify API.">
+<link rel="alternate" type="text/plain" href="llms.txt" title="llms.txt">
+<link rel="alternate" type="application/json" href="tools.json" title="Tool list (JSON)">
+<style>
+  :root { color-scheme: light dark; --bg:#ffffff; --fg:#1b1f24; --muted:#57606a; --link:#0b57d0; --code:#f3f4f6; --border:#d8dee4; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1115; --fg:#e6e8eb; --muted:#9aa4b2; --link:#8ab4f8; --code:#1c2027; --border:#2d333b; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 52rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  h1 { font-size:1.7rem; line-height:1.25; margin:0.5rem 0; }
+  h2 { font-size:1.3rem; margin-top:2.2rem; border-bottom:1px solid var(--border); padding-bottom:0.3rem; }
+  a { color:var(--link); }
+  p, li { overflow-wrap:anywhere; }
+  .lead { color:var(--muted); font-size:1.05rem; }
+  nav a { margin-right:0.9rem; white-space:nowrap; }
+  ul.tools { padding-left:1.1rem; }
+  ul.tools li { margin:0.6rem 0; }
+  .price { color:var(--muted); font-size:0.9rem; }
+  pre { background:var(--code); border:1px solid var(--border); border-radius:6px; padding:0.75rem; overflow-x:auto; white-space:pre-wrap; word-break:break-all; font-size:0.85rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  footer { margin-top:3rem; color:var(--muted); font-size:0.9rem; border-top:1px solid var(--border); padding-top:1rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Fast Data – data tools for AI agents in sales &amp; finance (Germany/EU)</h1>
+  <p class="lead">Small, focused data tools an AI agent can call: parse German e-invoices, check IBANs, VAT IDs and BaFin warnings, find public tenders and hiring signals, turn documents into Markdown. Each tool is a public <a href="https://apify.com/fast_data_asap">Apify Actor</a> with a fixed pay-per-result price.</p>
+  <nav><a href="#finance">Finance</a> <a href="#sales">Sales signals</a> <a href="#content">Content &amp; documents</a> <a href="#mcp">MCP setup</a> <a href="#x402">x402</a> <a href="#recipes">Recipes</a></nav>
+  <p>Machine-readable: <a href="llms.txt">llms.txt</a> · <a href="tools.json">tools.json</a> · MCP Registry name <code>io.github.ichkifokkus/fast-data</code></p>
+
+  <section id="finance">
+    <h2>Finance</h2>
+    <p>E-invoices, payment and counterparty checks for accounts-payable, KYC and finance agents.</p>
+    <ul class="tools">
+      <li><a href="https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser"><strong>XRechnung &amp; ZUGFeRD / Factur-X Parser</strong></a>: Turns German/EU e-invoices (XRechnung UBL/CII, ZUGFeRD, Factur-X PDF) into JSON with seller, buyer, IBAN, totals, VAT breakdown, line items and plausibility warnings.<br><span class="price">$0.003 per parsed e-invoice ($3 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/iban-validator-bank-lookup"><strong>IBAN Validator &amp; Bank Lookup (BIC, Bank Name)</strong></a>: Validates IBANs in bulk (structure, MOD-97 and national checksums, SEPA flag) and adds bank name, BIC and city from official registries.<br><span class="price">$0.0005 per IBAN validated ($0.50 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/eu-vat-number-validator"><strong>EU VAT Number Validator (VIES)</strong></a>: Checks EU VAT numbers against the official VIES service and returns validity plus company name and address where the country shares them.<br><span class="price">$0.001 per VAT number checked ($1 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/bafin-investor-warnings"><strong>BaFin Warnings Scraper</strong></a>: Lists current BaFin investor warnings and screens company names or domains against them with a fuzzy match score for KYC/AML checks.<br><span class="price">$0.002 per BaFin warning returned ($2 per 1,000); $0.01 per name screened</span></li>
+      <li><a href="https://apify.com/fast_data_asap/defillama-defi-data"><strong>DefiLlama Data Export</strong></a>: Exports DefiLlama DeFi data (TVL, stablecoin supply, DEX volumes, fees, yields) as flat tables.<br><span class="price">$0.0002 per row ($0.20 per 1,000)</span></li>
+    </ul>
+  </section>
+  <section id="sales">
+    <h2>Sales signals</h2>
+    <p>Public tenders, hiring and shop data that show who is buying or growing.</p>
+    <ul class="tools">
+      <li><a href="https://apify.com/fast_data_asap/german-public-tenders-bund"><strong>German Public Tenders Scraper</strong></a>: Searches German public tenders on service.bund.de by keyword, federal state, category and date, with authority, CPV and deadline.<br><span class="price">$0.002 per tender ($2 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/dach-shop-lead-profiler"><strong>E-commerce Lead Enrichment</strong></a>: Profiles DE/AT/CH online shops from a domain: shop system, payment methods, apps, Impressum company and contact, catalogue size.<br><span class="price">$0.02 per shop lead profile; plus $0.00005 per run start</span></li>
+      <li><a href="https://apify.com/fast_data_asap/sitemap-change-monitor"><strong>Competitor Website Monitor</strong></a>: Reports new, removed or updated URLs on competitor websites from their sitemaps, e.g. new products or landing pages.<br><span class="price">$0.003 per domain check ($3 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/woocommerce-store-products"><strong>WooCommerce Products Scraper</strong></a>: Reads products from any WooCommerce shop via its public Store API: prices, sale prices, stock, SKU, categories, variations.<br><span class="price">$0.0007 per product ($0.70 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/shop-shipping-returns-extractor"><strong>Shipping &amp; Returns Policy Extractor</strong></a>: Extracts shipping costs, free-shipping threshold, delivery times, return window and withdrawal period from online shops.<br><span class="price">$0.003 per shop analysed ($3 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/job-search-api"><strong>Arbeitsagentur Job Scraper &amp; Job Search API</strong></a>: Searches job postings by keyword, city and radius across the German Federal Employment Agency and remote job boards, de-duplicated.<br><span class="price">$0.0025 per job ($2.50 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/career-site-jobs-api"><strong>Career Site Jobs Scraper</strong></a>: Gets every open job straight from company career sites (Workday, Greenhouse, Lever, Ashby and more), with a new-jobs-only mode for daily hiring signals.<br><span class="price">$0.002 per job ($2 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/german-apprenticeships-ausbildung"><strong>German Apprenticeships</strong></a>: Searches German apprenticeship (Ausbildung) and dual-study offers from official Federal Employment Agency data.<br><span class="price">$0.001 per offer ($1 per 1,000)</span></li>
+    </ul>
+  </section>
+  <section id="content">
+    <h2>Content &amp; documents</h2>
+    <p>Turn documents, websites, videos and news into text an agent can read.</p>
+    <ul class="tools">
+      <li><a href="https://apify.com/fast_data_asap/document-to-markdown"><strong>PDF to Markdown for RAG</strong></a>: Converts PDF, Word, PowerPoint, Excel, EPUB and images to clean Markdown with tables, and OCR for scans.<br><span class="price">$0.0015 per page converted ($1.50 per 1,000); $0.005 per OCR page ($5 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/website-to-llm-markdown"><strong>Website to Markdown for RAG</strong></a>: Crawls a website or sitemap into clean Markdown, split into heading-aware chunks with token counts for RAG.<br><span class="price">$0.0015 per page converted ($1.50 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/bulk-ocr-image-to-text"><strong>Bulk OCR</strong></a>: Extracts text from images and scanned PDFs in 100+ languages, as plain text, lines or words with bounding boxes.<br><span class="price">$0.001 per OCR&#x27;d page ($1 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/pdf-toolkit-merge-split-compress"><strong>PDF Toolkit API</strong></a>: Merges, splits, compresses and rotates PDFs by URL, converts pages to images or reads PDF metadata.<br><span class="price">$0.003 per output file ($3 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/youtube-transcript-scraper"><strong>YouTube Transcript Scraper</strong></a>: Gets transcripts and subtitles of YouTube videos, Shorts, channels and playlists as text, timestamps or LLM chunks.<br><span class="price">$0.002 per transcript ($2 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/google-news-scraper"><strong>Google News Scraper</strong></a>: Searches Google News by keyword and returns title, source, date, the real article URL and optional full text.<br><span class="price">$0.0025 per article ($2.50 per 1,000); $0.0025 per full text add-on ($2.50 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/google-trends-scraper"><strong>Google Trends Scraper</strong></a>: Compares keywords on one Google Trends scale: interest over time, by region, related and rising queries.<br><span class="price">$0.003 per result ($3 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/german-federal-court-decisions"><strong>German Court Decisions</strong></a>: Returns German federal court decisions (BGH, BVerfG, BAG and others) from the official open-data portal as JSON or Markdown.<br><span class="price">$0.001 per decision ($1 per 1,000)</span></li>
+    </ul>
+  </section>
+  <section id="media">
+    <h2>Images &amp; media</h2>
+    <p>Bulk image and audio processing.</p>
+    <ul class="tools">
+      <li><a href="https://apify.com/fast_data_asap/ai-image-upscaler"><strong>AI Image Upscaler</strong></a>: Upscales images 2x or 4x in bulk with Real-ESRGAN.<br><span class="price">$0.015 per upscaled image; lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/ai-background-remover"><strong>AI Background Remover</strong></a>: Removes image backgrounds in bulk and returns transparent PNG/WebP or white-background JPG.<br><span class="price">$0.006 per image processed ($6 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/bulk-image-downloader"><strong>Bulk Image Downloader</strong></a>: Downloads all images from a website or URL list as one ZIP, with size/type filters and format conversion.<br><span class="price">$0.0035 per image saved ($3.50 per 1,000); lower on paid Apify plans</span></li>
+      <li><a href="https://apify.com/fast_data_asap/bulk-image-watermark-resize"><strong>Bulk Image Watermark, Resize &amp; Convert to WebP/AVIF</strong></a>: Watermarks, resizes and converts images in bulk (WebP, AVIF, JPG, PNG) with marketplace presets.<br><span class="price">$0.002 per processed image ($2 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/ai-image-metadata-detector"><strong>AI Image Metadata Checker</strong></a>: Checks images for AI-generation metadata (C2PA, IPTC DigitalSourceType, generator tags) and EXIF camera data.<br><span class="price">$0.0015 per image analysed ($1.50 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/text-to-speech-kokoro"><strong>Text to Speech MP3 (Open Voices, No API Key)</strong></a>: Converts text to natural speech (MP3/WAV) with the open Kokoro TTS model, 41 voices.<br><span class="price">$0.02 per 1,000 characters</span></li>
+      <li><a href="https://apify.com/fast_data_asap/qr-barcode-generator-reader"><strong>QR Code &amp; Barcode Generator + Reader (Bulk, PNG/SVG, Logo)</strong></a>: Generates QR codes and barcodes (EAN, UPC, Code 128, Data Matrix) as PNG/SVG, or reads them from images.<br><span class="price">$0.0005 per code ($0.50 per 1,000)</span></li>
+    </ul>
+  </section>
+  <section id="dev">
+    <h2>Web, shop &amp; developer checks</h2>
+    <p>Compliance, SEO and data-quality checks for websites and online shops.</p>
+    <ul class="tools">
+      <li><a href="https://apify.com/fast_data_asap/german-shop-compliance-checker"><strong>German Shop Legal Check</strong></a>: Checks German online shops for common warning-letter risks: Impressum, unit prices (PAngV), old ODR link, accessibility (BFSG).<br><span class="price">$0.01 per shop checked; plus $0.00005 per run start</span></li>
+      <li><a href="https://apify.com/fast_data_asap/gpsr-product-page-checker"><strong>GPSR Compliance Checker</strong></a>: Checks product pages for EU GPSR information: manufacturer, EU responsible person, safety warnings, product ID.<br><span class="price">$0.005 per product page checked ($5 per 1,000); plus $0.00005 per run start</span></li>
+      <li><a href="https://apify.com/fast_data_asap/cookie-consent-tracker-checker"><strong>Cookie &amp; Tracker Consent Checker</strong></a>: Loads pages in a real browser without consenting and lists cookies and trackers that run before consent (GDPR/TTDSG).<br><span class="price">$0.004 per page checked ($4 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/product-schema-checker"><strong>Product Schema Checker</strong></a>: Validates schema.org Product JSON-LD on product pages and scores it with fix hints.<br><span class="price">$0.002 per page checked ($2 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/ean-gtin-lookup"><strong>EAN / GTIN / UPC Validator</strong></a>: Validates EAN, UPC, GTIN and ISBN codes in bulk (check digit, type, GS1 prefix) with optional Open Food Facts data.<br><span class="price">$0.0002 per valid barcode processed ($0.20 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/shopify-llms-txt-generator"><strong>Shopify llms.txt Generator</strong></a>: Generates ready-to-upload llms.txt and llms-full.txt files for a Shopify store.<br><span class="price">$0.03 per llms.txt generated; plus $0.00005 per run start</span></li>
+      <li><a href="https://apify.com/fast_data_asap/ai-crawler-access-checker"><strong>AI Crawler Checker</strong></a>: Checks whether GPTBot, ClaudeBot, PerplexityBot and other AI crawlers can reach a site (robots.txt, blocking, llms.txt, JSON-LD).<br><span class="price">$0.005 per website checked ($5 per 1,000); plus $0.00005 per run start</span></li>
+      <li><a href="https://apify.com/fast_data_asap/broken-link-internal-link-checker"><strong>Broken Link Checker &amp; Internal Link Graph (Fast, No Browser)</strong></a>: Crawls a website and finds broken links, redirect chains and links to noindex pages, plus an internal link graph.<br><span class="price">$0.001 per crawled page ($1 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/readability-seo-content-checker"><strong>Readability &amp; SEO Content Checker</strong></a>: Scores readability of pages or texts in English and German (Flesch, Wiener Sachtextformel and more) plus basic SEO checks.<br><span class="price">$0.002 per page or text analysed ($2 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/page-weight-carbon-checker"><strong>Website Carbon &amp; Page Weight Checker</strong></a>: Measures page weight, requests and estimated CO2 per page view to find heavy pages.<br><span class="price">$0.004 per page analysed ($4 per 1,000)</span></li>
+      <li><a href="https://apify.com/fast_data_asap/german-weather-dwd-open-data"><strong>German Weather Data API (DWD)</strong></a>: Returns hourly weather observations and forecasts for any place in Germany from DWD open data.<br><span class="price">$0.001 per location ($1 per 1,000)</span></li>
+    </ul>
+  </section>
+
+  <section id="mcp">
+    <h2>Use from Claude, Cursor or VS Code (MCP)</h2>
+    <p>The tools are served by <a href="https://mcp.apify.com">Apify's hosted MCP server</a>, limited to Fast Data Actors. We build the Actors; Apify runs the server. Sign in with OAuth (Claude.ai, VS Code) or send <code>Authorization: Bearer &lt;APIFY_TOKEN&gt;</code>.</p>
+    <p><strong>All tools listed in the registry entry:</strong></p>
+    <pre><code>https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader</code></pre>
+    <p><strong>Finance &amp; Sales pack</strong> (8 tools, shorter tool list for accounts-payable, KYC and lead-research agents):</p>
+    <pre><code>https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api</code></pre>
+    <p>Example for Claude Code:</p>
+    <pre><code>claude mcp add --transport http fast-data-finance "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/german-public-tenders-bund,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api" --header "Authorization: Bearer $APIFY_TOKEN"</code></pre>
+    <p>Any other tool on this page can be added to the <code>tools=</code> list by its ID, e.g. <code>fast_data_asap/website-to-llm-markdown</code>. Copy-paste configs for each client: <a href="https://github.com/ichkifokkus/data-recipes/tree/main/mcp">mcp/README.md</a>.</p>
+  </section>
+
+  <section id="x402">
+    <h2>Pay per call with x402 – no account needed</h2>
+    <p>Agents without an Apify account can pay with USDC stablecoins via the <a href="https://www.x402.org/">x402 protocol</a>: buy a prepaid Apify token (minimum $1, valid for 14 days), then use it as the bearer token for the Apify API or the MCP server URLs above. All Fast Data Actors run with limited permissions, so they work with prepaid tokens. Apify marks this feature as experimental.</p>
+    <p>How it works, step by step: <a href="https://docs.apify.com/platform/integrations/x402">docs.apify.com/platform/integrations/x402</a>.</p>
+  </section>
+
+  <section id="recipes">
+    <h2>Ready-made n8n recipes</h2>
+    <ol>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/1-youtube-channel-ai-summaries">YouTube channel to AI summaries</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/2-daily-news-alert">Daily brand &amp; competitor news alert</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/3-weekly-trend-report">Weekly keyword trend report</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/4-hiring-signal-alert">Hiring-signal alert for target companies</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/5-bulk-image-upscale">Bulk-upscale product images from a sheet</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/6-pdf-inbox-to-markdown">PDF inbox to Markdown and AI summary</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/7-competitor-sitemap-alert">Competitor product &amp; page alert</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/8-ai-finance-assistant-einvoice-check">AI finance assistant: check incoming e-invoices</a></li>
+      <li><a href="https://github.com/ichkifokkus/data-recipes/tree/main/9-sales-signals-daily-feed">Sales signals: daily B2B buying-signal feed</a></li>
+    </ol>
+  </section>
+
+  <footer>
+    <p>Payments are processed by Apify. Prices are Apify pay-per-result prices on the Free and Starter plans, as listed in Apify Store when this page was generated; the store page is authoritative.</p>
+    <p>Contact: <a href="https://github.com/ichkifokkus/data-recipes/issues">GitHub issues</a>. Source: <a href="https://github.com/ichkifokkus/data-recipes">github.com/ichkifokkus/data-recipes</a>.</p>
+  </footer>
+</main>
+</body>
+</html>
