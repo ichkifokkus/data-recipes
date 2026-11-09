@@ -14,3 +14,6 @@ Each skill is one folder with a `SKILL.md` (instructions + when to use it) and, 
 
 | Skill | Task | Tools used |
 |---|---|---|
+| [find-public-tenders](find-public-tenders/SKILL.md) | Find open public tenders in Germany and the EU, ranked by deadline | `german-public-tenders-bund`, `eu-tenders-ted-api` |
+
+Format rules for contributors: [FORMAT.md](FORMAT.md).

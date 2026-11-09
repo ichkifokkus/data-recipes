@@ -70,6 +70,10 @@ Without MCP, run a tool with `POST https://api.apify.com/v2/acts/fast_data_asap~
 - [Website Carbon & Page Weight Checker](https://apify.com/fast_data_asap/page-weight-carbon-checker.md): Measures page weight, requests and estimated CO2 per page view to find heavy pages. Price: $0.004 per page analysed ($4 per 1,000). MCP tool: `fast_data_asap/page-weight-carbon-checker`
 - [German Weather Data API (DWD)](https://apify.com/fast_data_asap/german-weather-dwd-open-data.md): Returns hourly weather observations and forecasts for any place in Germany from DWD open data. Price: $0.001 per location ($1 per 1,000). MCP tool: `fast_data_asap/german-weather-dwd-open-data`
 
+## Skills
+
+- [find-public-tenders](https://github.com/ichkifokkus/data-recipes/blob/main/skills/find-public-tenders/SKILL.md): Agent Skill – open public tenders in Germany and the EU, ranked by deadline
+
 ## Optional
 
 - [YouTube channel to AI summaries](https://github.com/ichkifokkus/data-recipes/blob/main/1-youtube-channel-ai-summaries/README.md): n8n workflow recipe
