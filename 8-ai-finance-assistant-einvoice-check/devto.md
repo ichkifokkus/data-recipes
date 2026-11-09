@@ -1,6 +1,6 @@
 ---
 title: "How to build an AI accounts-payable check for German e-invoices with n8n"
-published: false
+published: true
 description: "A free n8n workflow that parses XRechnung and ZUGFeRD invoices, checks the supplier's IBAN, EU VAT ID (VIES) and BaFin warnings, and writes a green/yellow/red light to Google Sheets. Plus what happened with the official test invoices."
 tags: n8n, automation, fintech, ai
 ---
@@ -101,3 +101,9 @@ And it does not catch the most common invoice fraud: a real supplier's invoice w
 5. Activate and drop the KoSIT test invoice into the folder: you should get a red row.
 
 The workflow, the README with all rules and the sheet layout are in the [data-recipes repo](https://github.com/ichkifokkus/data-recipes/tree/main/8-ai-finance-assistant-einvoice-check). If you would rather give these checks to Claude or Cursor directly, the same actors are available as MCP tools in the repo's Finance & Sales pack.
+
+**Try the actors directly:** [E-Invoice Parser](https://apify.com/fast_data_asap/xrechnung-zugferd-einvoice-parser) · [IBAN Validator](https://apify.com/fast_data_asap/iban-validator-bank-lookup) · [EU VAT Validator](https://apify.com/fast_data_asap/eu-vat-number-validator) · [BaFin Warnings](https://apify.com/fast_data_asap/bafin-investor-warnings)
+
+How do you check incoming invoices today: fully manual, rules in your accounting tool, or already with an agent?
+
+*This is a technical check, not tax or legal advice.*
