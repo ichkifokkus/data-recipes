@@ -1,8 +1,8 @@
 ---
 title: "How to build a daily B2B sales-signal feed from public tenders and hiring data with n8n"
-published: false
+published: true
 description: "A free n8n workflow that collects German public tenders and new job postings at your target accounts every weekday, scores them with two simple rules and posts only the new ones to Slack, Google Sheets and (optionally) your CRM."
-tags: n8n, automation, sales, opendata
+tags: n8n, automation, productivity, sales
 ---
 
 Most "intent data" tools sell you a score without telling you where it comes from. But two of the strongest B2B buying signals are public and free to read:
@@ -69,6 +69,11 @@ The *Normalize & score* Code node maps both sources to the same fields and appli
 - **Tender**: if the offer deadline (or, when none is published, the end of publication) is less than 21 days away, it is **high**. Someone has to make a bid/no-bid decision this week. Otherwise **medium**. Tenders whose deadline has already passed are dropped.
 - **Hiring**: three or more roles at the same company in the window is **high**. Two roles, or one leadership role (Head of, Director, VP), is **medium**. A single other role is **low**.
 
+| Signal | High | Medium | Low |
+|---|---|---|---|
+| Tender | deadline < 21 days away | deadline 21+ days away | – (expired tenders are dropped) |
+| Hiring | 3+ roles at one company | 2 roles, or 1 leadership role | 1 other role |
+
 Both thresholds are constants at the top of the node. In practice you will want to tune them: count only Sales or Engineering titles, or give extra weight to your core regions.
 
 ## Deduplication with a Google Sheet
@@ -89,7 +94,7 @@ Both actors charge per result: **$0.002 per tender** and **$0.002 per job postin
 
 ## Limits worth knowing
 
-- Tenders cover **Germany via one portal**. Not every contracting body publishes there, and some titles are truncated by the portal. An EU-wide TED actor is in preparation and will slot in as a third branch once it is public.
+- Tenders cover **Germany via one portal**. Not every contracting body publishes there, and some titles are truncated by the portal. For EU-wide notices, our [EU Tenders (TED) API](https://apify.com/fast_data_asap/eu-tenders-ted-api) ($0.002 per notice) can be added as a third HTTP branch with the same schema mapping.
 - Hiring data is only as good as the career site. Custom career pages without a supported job board return nothing, and a re-posted job counts as new.
 - This is a lead feed, not procurement or legal advice. Read the official notice before you bid.
 
@@ -102,3 +107,11 @@ Both actors charge per result: **$0.002 per tender** and **$0.002 per job postin
 5. Optionally enable the Pipedrive node, run once, and activate.
 
 The workflow, the full README with the scoring table and the limits are in the [data-recipes repo](https://github.com/ichkifokkus/data-recipes/tree/main/9-sales-signals-daily-feed). Pull requests welcome.
+
+## Try it
+
+- [German Public Tenders on Apify](https://apify.com/fast_data_asap/german-public-tenders-bund)
+- [Career Site Jobs API on Apify](https://apify.com/fast_data_asap/career-site-jobs-api)
+- [Workflow + README on GitHub](https://github.com/ichkifokkus/data-recipes/tree/main/9-sales-signals-daily-feed)
+
+**Question for the sales and RevOps people here:** which public signal has actually led to a meeting for you – tenders, hiring, funding news, or something else entirely? I would like to add the one that really works as the next branch.
