@@ -27,6 +27,15 @@
     "mcpToolId": "fast_data_asap/eu-vat-number-validator"
   },
   {
+    "slug": "dach-company-kyb-official",
+    "name": "EU Company Check (KYB)",
+    "description": "Checks companies (name, LEI or register number) against official GLEIF and EU VIES data: legal name, register ID, address, legal form, LEI status, parent companies and VAT validity in one row for KYB and supplier checks.",
+    "category": "finance",
+    "pricing": "$0.004 per company profile ($4 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/dach-company-kyb-official",
+    "mcpToolId": "fast_data_asap/dach-company-kyb-official"
+  },
+  {
     "slug": "bafin-investor-warnings",
     "name": "BaFin Warnings Scraper",
     "description": "Lists current BaFin investor warnings and screens company names or domains against them with a fuzzy match score for KYC/AML checks.",
@@ -55,8 +64,8 @@
   },
   {
     "slug": "dach-shop-lead-profiler",
-    "name": "E-commerce Lead Enrichment",
-    "description": "Profiles DE/AT/CH online shops from a domain: shop system, payment methods, apps, Impressum company and contact, catalogue size.",
+    "name": "DACH Shop Company Profiler",
+    "description": "Profiles DE/AT/CH online shops from a domain: shop system, payment methods, apps, company facts (legal form, city, register, VAT ID), catalogue size. No personal contact data.",
     "category": "sales",
     "pricing": "$0.02 per shop lead profile; plus $0.00005 per run start",
     "storeUrl": "https://apify.com/fast_data_asap/dach-shop-lead-profiler",
