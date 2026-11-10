@@ -14,6 +14,7 @@ Each skill is one folder with a `SKILL.md` (instructions + when to use it) and, 
 
 | Skill | Task | Tools used |
 |---|---|---|
+| [verify-supplier-de](verify-supplier-de/SKILL.md) | Check a supplier before payment: company identity (GLEIF), VAT (VIES), IBAN and bank | `dach-company-kyb-official`, `iban-validator-bank-lookup` |
 | [find-public-tenders](find-public-tenders/SKILL.md) | Find open public tenders in Germany and the EU, ranked by deadline | `german-public-tenders-bund`, `eu-tenders-ted-api` |
 
 Format rules for contributors: [FORMAT.md](FORMAT.md).
