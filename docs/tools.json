@@ -36,6 +36,15 @@
     "mcpToolId": "fast_data_asap/dach-company-kyb-official"
   },
   {
+    "slug": "ecb-exchange-rates-invoice-converter",
+    "name": "ECB Exchange Rates",
+    "description": "Converts invoice amounts between currencies with the official ECB euro reference rates for each invoice date; weekend and holiday fallbacks are flagged with the rate date actually used.",
+    "category": "finance",
+    "pricing": "$0.001 per converted row ($1 per 1,000); $0.001 per rate row ($1 per 1,000)",
+    "storeUrl": "https://apify.com/fast_data_asap/ecb-exchange-rates-invoice-converter",
+    "mcpToolId": "fast_data_asap/ecb-exchange-rates-invoice-converter"
+  },
+  {
     "slug": "bafin-investor-warnings",
     "name": "BaFin Warnings Scraper",
     "description": "Lists current BaFin investor warnings and screens company names or domains against them with a fuzzy match score for KYC/AML checks.",

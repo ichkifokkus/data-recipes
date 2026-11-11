@@ -19,6 +19,7 @@ Registry name: `io.github.ichkifokkus/fast-data` (see [`server.json`](../server.
 | [EU VAT Number Validator (VIES)](https://apify.com/fast_data_asap/eu-vat-number-validator) | Check EU VAT IDs against VIES, with company name where the country shares it |
 | [BaFin Warnings](https://apify.com/fast_data_asap/bafin-investor-warnings) | List current BaFin warnings or screen company names/domains against them |
 | [EU Company Check (KYB)](https://apify.com/fast_data_asap/dach-company-kyb-official) | Check a company by name, LEI or register number: legal name, register ID, address, LEI status, parents and VAT validity from GLEIF and VIES |
+| [ECB Exchange Rates – Invoice Currency Converter](https://apify.com/fast_data_asap/ecb-exchange-rates-invoice-converter) | Convert invoice amounts with the official ECB euro reference rate of the invoice date; weekend/holiday fallback flagged with the rate date used |
 | [German Public Tenders (service.bund.de)](https://apify.com/fast_data_asap/german-public-tenders-bund) | Search German public tenders by keyword, region, category |
 | [DACH Shop Lead Profiler](https://apify.com/fast_data_asap/dach-shop-lead-profiler) | Profile DE/AT/CH online shops: shop system, payments, Impressum company and contact |
 | [Job Search API](https://apify.com/fast_data_asap/job-search-api) | Search job postings (hiring signals) |
@@ -41,7 +42,7 @@ See each Actor page for the exact input fields and prices.
 ## Server URL
 
 ```
-https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
+https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader
 ```
 
 Want fewer tools? Delete Actors from the `tools=` list (comma-separated, `owner/actor-name`).
@@ -51,13 +52,13 @@ Want fewer tools? Delete Actors from the `tools=` list (comma-separated, `owner/
 A smaller, focused variant with only the eight finance and sales tools above. Fewer tools means a shorter tool list for the model and fewer wrong picks, so use this one for accounts-payable, KYC and lead-research agents:
 
 ```
-https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api
+https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api
 ```
 
 Use it exactly like the full URL in the setup steps below (just swap the URL). Example for Claude Code:
 
 ```bash
-claude mcp add --transport http fast-data-finance "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api" \
+claude mcp add --transport http fast-data-finance "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api" \
   --header "Authorization: Bearer $APIFY_TOKEN"
 ```
 
@@ -75,7 +76,7 @@ claude mcp add --transport http fast-data-finance "https://mcp.apify.com/?tools=
 ### Claude Code
 
 ```bash
-claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader" \
+claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader" \
   --header "Authorization: Bearer $APIFY_TOKEN"
 ```
 
@@ -85,7 +86,7 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
 {
   "mcpServers": {
     "fast-data": {
-      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader",
+      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader",
       "headers": { "Authorization": "Bearer YOUR_APIFY_TOKEN" }
     }
   }
@@ -99,7 +100,7 @@ claude mcp add --transport http fast-data "https://mcp.apify.com/?tools=fast_dat
   "servers": {
     "fast-data": {
       "type": "http",
-      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader"
+      "url": "https://mcp.apify.com/?tools=fast_data_asap/xrechnung-zugferd-einvoice-parser,fast_data_asap/iban-validator-bank-lookup,fast_data_asap/eu-vat-number-validator,fast_data_asap/bafin-investor-warnings,fast_data_asap/dach-company-kyb-official,fast_data_asap/ecb-exchange-rates-invoice-converter,fast_data_asap/german-public-tenders-bund,fast_data_asap/eu-tenders-ted-api,fast_data_asap/dach-shop-lead-profiler,fast_data_asap/job-search-api,fast_data_asap/career-site-jobs-api,fast_data_asap/youtube-transcript-scraper,fast_data_asap/google-trends-scraper,fast_data_asap/google-news-scraper,fast_data_asap/document-to-markdown,fast_data_asap/ai-image-upscaler,fast_data_asap/ai-background-remover,fast_data_asap/bulk-image-downloader"
     }
   }
 }
