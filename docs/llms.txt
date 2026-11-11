@@ -76,6 +76,7 @@ Without MCP, run a tool with `POST https://api.apify.com/v2/acts/fast_data_asap~
 
 - [verify-supplier-de](https://github.com/ichkifokkus/data-recipes/blob/main/skills/verify-supplier-de/SKILL.md): Agent Skill – check a supplier before payment (GLEIF company data, EU VAT, IBAN/bank)
 - [find-public-tenders](https://github.com/ichkifokkus/data-recipes/blob/main/skills/find-public-tenders/SKILL.md): Agent Skill – open public tenders in Germany and the EU, ranked by deadline
+- [convert-invoice-currency](https://github.com/ichkifokkus/data-recipes/blob/main/skills/convert-invoice-currency/SKILL.md): Agent Skill – convert invoice amounts to EUR with the official ECB rate of the invoice date (weekend fallback flagged)
 
 ## Optional
 
