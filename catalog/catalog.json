@@ -1,6 +1,18 @@
 {
-  "updatedAt": "2026-11-08",
+  "updatedAt": "2026-11-14",
   "tools": [
+    {
+      "name": "csv2zugferd setup assistant",
+      "provider": "rillsoft (open source)",
+      "ours": false,
+      "category": "finance",
+      "description": "Drafts and checks the mapping from your CSV export to ZUGFeRD/Factur-X invoices, running locally.",
+      "access": "Local MCP (stdio)",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://github.com/rillsoft/csv2zugferd",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
     {
       "name": "Deutsche Bundesbank MCP",
       "provider": "Pipeworx (pipeworx.io)",
@@ -11,6 +23,18 @@
       "pricing": "Free: 50 calls/day anonymous, 200/day with free account; paid credits beyond",
       "url": "https://pipeworx.io/packs/bundesbank-de",
       "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "E-Rechnung Inbox / XRechnung MCP",
+      "provider": "imysfylmz (open source)",
+      "ours": false,
+      "category": "finance",
+      "description": "Validates and parses German e-invoices (XRechnung, ZUGFeRD, Factur-X) offline without an API key.",
+      "access": "Local MCP",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://github.com/imysfylmz/e-rechnung-inbox",
+      "checkedAt": "2026-11-14",
       "status": "ok"
     },
     {
@@ -38,6 +62,18 @@
       "status": "ok"
     },
     {
+      "name": "IBAN Test & Validation",
+      "provider": "iban-test.eu",
+      "ours": false,
+      "category": "finance",
+      "description": "Validates IBANs in batches, checks German bank account numbers and generates test IBANs for development.",
+      "access": "Remote MCP: https://www.iban-test.eu/mcp",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://www.iban-test.eu/mcp",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
+    {
       "name": "IBAN Validator & Bank Lookup",
       "provider": "Fast Data (fast_data_asap)",
       "ours": true,
@@ -59,6 +95,30 @@
       "pricing": "Free: 50 calls/day anonymous, 200/day with free account; paid credits beyond",
       "url": "https://pipeworx.io/packs/openiban",
       "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "PDF to e-invoice (ZUGFeRD / XRechnung)",
+      "provider": "smart-byte (open source)",
+      "ours": false,
+      "category": "finance",
+      "description": "Turns an invoice PDF into an EN 16931 ZUGFeRD/Factur-X file or invoice data into XRechnung, locally.",
+      "access": "Local MCP",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://github.com/smart-byte/pdf-to-einvoice",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
+    {
+      "name": "SEPA XML (pain.001) & IBAN MCP",
+      "provider": "Geornaden / finops-studio (open source)",
+      "ours": false,
+      "category": "finance",
+      "description": "Generates ISO 20022 SEPA credit transfer and direct debit XML files with a MOD-97 IBAN check.",
+      "access": "Local MCP",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://github.com/Geornaden/finops-studio",
+      "checkedAt": "2026-11-14",
       "status": "ok"
     },
     {
@@ -134,6 +194,18 @@
       "status": "ok"
     },
     {
+      "name": "EU VAT Validate (Aether Layer)",
+      "provider": "aether-layer.com",
+      "ours": false,
+      "category": "compliance",
+      "description": "Checks EU VAT numbers with a local format and checksum test for all member states, then confirms via VIES.",
+      "access": "Remote MCP: https://aether-layer.com/api/mcp",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://aether-layer.com/api/mcp?src=mcpreg",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
+    {
       "name": "EU VIES MCP",
       "provider": "Pipeworx (pipeworx.io)",
       "ours": false,
@@ -194,6 +266,18 @@
       "status": "ok"
     },
     {
+      "name": "KoSIT e-invoice validator (nyo-agentti)",
+      "provider": "nyo-agentti (open source)",
+      "ours": false,
+      "category": "compliance",
+      "description": "Validates XRechnung, Peppol BIS 3 and EN 16931 invoices with the KoSIT validator and explains each rule.",
+      "access": "Remote MCP: https://einvoice-validator-k2qw.onrender.com/mcp",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://einvoice-validator-k2qw.onrender.com/mcp",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
+    {
       "name": "OpenSanctions MCP",
       "provider": "Pipeworx (pipeworx.io)",
       "ours": false,
@@ -214,6 +298,66 @@
       "access": "Remote MCP: https://sanctions-screening.caseyjhand.com/mcp; npm @cyanheads/sanctions-screening-mcp-server",
       "pricing": "Free, open source",
       "url": "https://github.com/cyanheads/sanctions-screening-mcp-server",
+      "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "Agentic Firmenbuch (Handelsregister + Firmenbuch MCP)",
+      "provider": "Agentic-Firmenbuch",
+      "ours": false,
+      "category": "company-data",
+      "description": "Gives master data, financials and ratios for companies in the German Handelsregister and Austrian Firmenbuch.",
+      "access": "Remote MCP: https://register.agentic-firmenbuch.at/mcp (account)",
+      "pricing": "Free: 25 companies/month; paid plans from EUR 29/month",
+      "url": "https://www.agentic-firmenbuch.at",
+      "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "Bundesanzeiger Scraper",
+      "provider": "memo23",
+      "ours": false,
+      "category": "company-data",
+      "description": "Retrieves published annual financial statements and filings from the German Federal Gazette with parsed key figures.",
+      "access": "Apify Store / API: memo23/bundesanzeiger-scraper (also via mcp.apify.com)",
+      "pricing": "$0.0015 per publication; $0.005 per run start",
+      "url": "https://apify.com/memo23/bundesanzeiger-scraper",
+      "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "Entyrix MCP",
+      "provider": "Entyrix",
+      "ours": false,
+      "category": "company-data",
+      "description": "Provides KYB company briefs, financials, ownership and AML screening from 23 European business registers.",
+      "access": "Remote MCP: https://entyrix.com/mcp; npm @entyrix/mcp",
+      "pricing": "Free start tier; paid plans (see site)",
+      "url": "https://entyrix.com",
+      "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "GLEIF LEI MCP",
+      "provider": "Pipeworx (pipeworx.io)",
+      "ours": false,
+      "category": "company-data",
+      "description": "Looks up Legal Entity Identifiers and parent/child relationships from the GLEIF database.",
+      "access": "Remote MCP: https://gateway.pipeworx.io/gleif/mcp (npm @pipeworx/mcp-gleif)",
+      "pricing": "Free: 50 calls/day anonymous, 200/day with free account; paid credits beyond",
+      "url": "https://pipeworx.io/packs/gleif",
+      "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "Handelsregister API",
+      "provider": "Radeance",
+      "ours": false,
+      "category": "company-data",
+      "description": "Fetches live company data from handelsregister.de: register court and number, status, address and official documents.",
+      "access": "Apify Store / API: radeance/handelsregister-api (also via mcp.apify.com)",
+      "pricing": "$0.025 per result; add-ons $0.005-$0.10; $0.01 per run start",
+      "url": "https://apify.com/radeance/handelsregister-api",
       "checkedAt": "2026-11-08",
       "status": "ok"
     },
@@ -350,6 +494,18 @@
       "status": "ok"
     },
     {
+      "name": "German municipal tax data",
+      "provider": "crelvo.dev",
+      "ours": false,
+      "category": "public-sector",
+      "description": "Returns German municipal tax rules such as dog tax, second-home tax and garnishment limits, each cited to its source.",
+      "access": "Remote MCP: https://data.crelvo.dev/mcp",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://data.crelvo.dev/mcp",
+      "checkedAt": "2026-11-14",
+      "status": "ok"
+    },
+    {
       "name": "German Public Tenders (service.bund.de)",
       "provider": "Fast Data (fast_data_asap)",
       "ours": true,
@@ -394,66 +550,6 @@
       "access": "Remote MCP: https://vergabeweiser.de/mcp; REST API",
       "pricing": "Free, no sign-up (rate-limited)",
       "url": "https://vergabeweiser.de/api",
-      "checkedAt": "2026-11-08",
-      "status": "ok"
-    },
-    {
-      "name": "Agentic Firmenbuch (Handelsregister + Firmenbuch MCP)",
-      "provider": "Agentic-Firmenbuch",
-      "ours": false,
-      "category": "company-data",
-      "description": "Gives master data, financials and ratios for companies in the German Handelsregister and Austrian Firmenbuch.",
-      "access": "Remote MCP: https://register.agentic-firmenbuch.at/mcp (account)",
-      "pricing": "Free: 25 companies/month; paid plans from EUR 29/month",
-      "url": "https://www.agentic-firmenbuch.at",
-      "checkedAt": "2026-11-08",
-      "status": "ok"
-    },
-    {
-      "name": "Bundesanzeiger Scraper",
-      "provider": "memo23",
-      "ours": false,
-      "category": "company-data",
-      "description": "Retrieves published annual financial statements and filings from the German Federal Gazette with parsed key figures.",
-      "access": "Apify Store / API: memo23/bundesanzeiger-scraper (also via mcp.apify.com)",
-      "pricing": "$0.0015 per publication; $0.005 per run start",
-      "url": "https://apify.com/memo23/bundesanzeiger-scraper",
-      "checkedAt": "2026-11-08",
-      "status": "ok"
-    },
-    {
-      "name": "Entyrix MCP",
-      "provider": "Entyrix",
-      "ours": false,
-      "category": "company-data",
-      "description": "Provides KYB company briefs, financials, ownership and AML screening from 23 European business registers.",
-      "access": "Remote MCP: https://entyrix.com/mcp; npm @entyrix/mcp",
-      "pricing": "Free start tier; paid plans (see site)",
-      "url": "https://entyrix.com",
-      "checkedAt": "2026-11-08",
-      "status": "ok"
-    },
-    {
-      "name": "GLEIF LEI MCP",
-      "provider": "Pipeworx (pipeworx.io)",
-      "ours": false,
-      "category": "company-data",
-      "description": "Looks up Legal Entity Identifiers and parent/child relationships from the GLEIF database.",
-      "access": "Remote MCP: https://gateway.pipeworx.io/gleif/mcp (npm @pipeworx/mcp-gleif)",
-      "pricing": "Free: 50 calls/day anonymous, 200/day with free account; paid credits beyond",
-      "url": "https://pipeworx.io/packs/gleif",
-      "checkedAt": "2026-11-08",
-      "status": "ok"
-    },
-    {
-      "name": "Handelsregister API",
-      "provider": "Radeance",
-      "ours": false,
-      "category": "company-data",
-      "description": "Fetches live company data from handelsregister.de: register court and number, status, address and official documents.",
-      "access": "Apify Store / API: radeance/handelsregister-api (also via mcp.apify.com)",
-      "pricing": "$0.025 per result; add-ons $0.005-$0.10; $0.01 per run start",
-      "url": "https://apify.com/radeance/handelsregister-api",
       "checkedAt": "2026-11-08",
       "status": "ok"
     }
