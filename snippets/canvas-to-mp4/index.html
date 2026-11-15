@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:#0b1020}canvas{display:block}</style></head>
+<body><canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Page contract: draw everything from window.renderFrame(t). No timers, no requestAnimationFrame.
+const ctx = document.getElementById('c').getContext('2d');
+const bars = [["Denmark", 42.0], ["Finland", 37.8], ["Germany", 26.0], ["EU average", 20.0], ["Poland", 8.4]];
+const ease = x => 1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3);   // outCubic
+window.DURATION = 4;
+window.renderFrame = (t) => {
+  ctx.fillStyle = '#0b1020'; ctx.fillRect(0, 0, 1080, 1920);
+  ctx.fillStyle = '#fff'; ctx.font = '800 72px sans-serif';
+  ctx.fillText('Firms using AI, 2025', 80, 330);
+  ctx.font = '500 40px sans-serif'; ctx.fillStyle = '#9aa4c7';
+  ctx.fillText('Share of enterprises, Eurostat', 80, 395);
+  bars.forEach(([name, v], i) => {
+    const p = ease((t - 0.3 - i * 0.25) / 1.2);           // staggered grow-in
+    const y = 520 + i * 190, w = 680 * (v / 42) * p;
+    ctx.fillStyle = i === 2 ? '#facc15' : '#3b82f6';
+    ctx.fillRect(80, y, w, 110);
+    ctx.fillStyle = '#fff'; ctx.font = '700 46px sans-serif';
+    ctx.fillText(name, 80, y - 18);
+    ctx.font = '800 56px sans-serif';
+    ctx.fillText((v * p).toFixed(1) + ' %', 100 + w, y + 75);
+  });
+};
+</script></body></html>
