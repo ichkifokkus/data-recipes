@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-14",
+  "updatedAt": "2026-11-21",
   "tools": [
     {
       "name": "csv2zugferd setup assistant",
@@ -551,6 +551,42 @@
       "pricing": "Free, no sign-up (rate-limited)",
       "url": "https://vergabeweiser.de/api",
       "checkedAt": "2026-11-08",
+      "status": "ok"
+    },
+    {
+      "name": "Codixio API E-Invoice",
+      "provider": "Codixio",
+      "ours": false,
+      "category": "finance",
+      "description": "Validates XRechnung, ZUGFeRD and Factur-X invoices with the KoSIT validator and creates e-invoices.",
+      "access": "Remote MCP: https://api.codixio.com/mcp/einvoice",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://api.codixio.com/en/services/e-invoice",
+      "checkedAt": "2026-11-21",
+      "status": "ok"
+    },
+    {
+      "name": "EU & UK Public Tenders",
+      "provider": "Dataset Works",
+      "ours": false,
+      "category": "public-sector",
+      "description": "New EU and UK tenders and contract awards from TED, Find a Tender and Contracts Finder, served as an Apify actor.",
+      "access": "Remote MCP via Apify: https://mcp.apify.com/?tools=datasetworks/public-tenders",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://datasetworks.dev/tools/public-tenders/",
+      "checkedAt": "2026-11-21",
+      "status": "ok"
+    },
+    {
+      "name": "Tender Watch",
+      "provider": "TidyButton",
+      "ours": false,
+      "category": "public-sector",
+      "description": "Searches EU, UK and US public tenders, looks up award history and sends alerts on new matches.",
+      "access": "Remote MCP: https://tenders.tidybutton.com/mcp",
+      "pricing": "Not stated in the MCP Registry listing; see provider",
+      "url": "https://tenders.tidybutton.com/",
+      "checkedAt": "2026-11-21",
       "status": "ok"
     }
   ]

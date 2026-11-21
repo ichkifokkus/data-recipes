@@ -6,6 +6,7 @@ Machine-readable version: [catalog.json](catalog.json) · Last checked: see `che
 
 | Tool | Provider | Category | What an agent gets | Access | Checked |
 |---|---|---|---|---|---|
+| [Codixio API E-Invoice](https://api.codixio.com/en/services/e-invoice) | Codixio | finance | Validates XRechnung, ZUGFeRD and Factur-X invoices with the KoSIT validator and creates e-invoices. | Remote MCP | 2026-11-21 |
 | [csv2zugferd setup assistant](https://github.com/rillsoft/csv2zugferd) | rillsoft (open source) | finance | Drafts and checks the mapping from your CSV export to ZUGFeRD/Factur-X invoices, running locally. | Local MCP | 2026-11-14 |
 | [Deutsche Bundesbank MCP](https://pipeworx.io/packs/bundesbank-de) | Pipeworx (pipeworx.io) | finance | Queries Bundesbank statistical time series such as interest rates, exchange rates and banking statistics. | Remote MCP + package | 2026-11-08 |
 | [E-Rechnung Inbox / XRechnung MCP](https://github.com/imysfylmz/e-rechnung-inbox) | imysfylmz (open source) | finance | Validates and parses German e-invoices (XRechnung, ZUGFeRD, Factur-X) offline without an API key. | Local MCP | 2026-11-14 |
@@ -44,12 +45,14 @@ Machine-readable version: [catalog.json](catalog.json) · Last checked: see `che
 | [Ausschreibungsagenten Tender Search](https://www.ausschreibungsagenten.de/entwickler) | Ausschreibungsagenten | public-sector | Searches public procurement notices from 17 German, EU and UK sources, always linking to the original notice. | Remote MCP | 2026-11-08 |
 | [Bundestag DIP MCP](https://pipeworx.io/packs/bundestag-de) | Pipeworx (pipeworx.io) | public-sector | Searches the Bundestag documentation system (DIP) for bills, printed papers and plenary proceedings. | Remote MCP + package | 2026-11-08 |
 | [Destatis MCP](https://pipeworx.io/packs/destatis) | Pipeworx (pipeworx.io) | public-sector | Queries official German statistics tables from Destatis GENESIS-Online. | Remote MCP + package | 2026-11-08 |
+| [EU & UK Public Tenders](https://datasetworks.dev/tools/public-tenders/) | Dataset Works | public-sector | New EU and UK tenders and contract awards from TED, Find a Tender and Contracts Finder, served as an Apify actor. | Remote MCP (Apify) | 2026-11-21 |
 | [EU Funding & Tenders MCP](https://pipeworx.io/packs/eu-funding-tenders) | Pipeworx (pipeworx.io) | public-sector | Searches calls for proposals and tenders on the EU Funding & Tenders Portal. | Remote MCP + package | 2026-11-08 |
 | [EU TED Tenders Scraper](https://apify.com/foxlabs/ted-tenders) | foxlabs | public-sector | Fetches EU procurement notices, contract awards and RFPs from the official TED API. | Apify Store / API / MCP | 2026-11-08 |
 | [Eurostat MCP Server](https://github.com/cyanheads/eurostat-mcp-server) | cyanheads (open source) | public-sector | Searches and queries the Eurostat catalogue for EU economic, demographic, trade and regional data. | Remote MCP + package | 2026-11-08 |
 | [German municipal tax data](https://data.crelvo.dev/mcp) | crelvo.dev | public-sector | Returns German municipal tax rules such as dog tax, second-home tax and garnishment limits, each cited to its source. | Remote MCP | 2026-11-14 |
 | [German Public Tenders (service.bund.de)](https://apify.com/fast_data_asap/german-public-tenders-bund) (ours) | Fast Data (fast_data_asap) | public-sector | Searches current German public tenders from the federal procurement portal with deadlines and links. | Apify Store / API / MCP | 2026-11-08 |
 | [Germany Tenders MCP](https://pipeworx.io/packs/germany-tenders) | Pipeworx (pipeworx.io) | public-sector | Lists official German government tender notices without needing an API key. | Remote MCP + package | 2026-11-08 |
+| [Tender Watch](https://tenders.tidybutton.com/) | TidyButton | public-sector | Searches EU, UK and US public tenders, looks up award history and sends alerts on new matches. | Remote MCP | 2026-11-21 |
 | [TenderAPI](https://tenderapi.eu/en/) | TenderAPI.eu | public-sector | Searches EU tenders from TED and national portals by CPV code, country, buyer or contract value. | Remote MCP | 2026-11-08 |
 | [Vergabeweiser](https://vergabeweiser.de/api) | vergabeweiser.de | public-sector | Searches German public tenders and contract awards with deadlines, winners and market figures from open data. | Remote MCP | 2026-11-08 |
 
